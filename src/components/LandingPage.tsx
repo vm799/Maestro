@@ -1,6 +1,5 @@
-```javascript
 import React from 'react';
-import { ArrowRight, Shield, Zap, Layout, ChevronRight, CheckCircle } from 'lucide-react';
+import { ArrowRight, Shield, Zap, Layout, ChevronRight, CheckCircle, ShieldCheck, Globe } from 'lucide-react';
 import { Entropy } from './Entropy';
 
 interface LandingPageProps {
@@ -19,7 +18,7 @@ export function LandingPage({ onLogin }: LandingPageProps) {
                         </div>
                         Sovereign Architect
                     </div>
-                    <button 
+                    <button
                         onClick={onLogin}
                         className="text-sm font-medium text-zinc-400 hover:text-white transition-colors"
                     >
@@ -28,54 +27,79 @@ export function LandingPage({ onLogin }: LandingPageProps) {
                 </div>
             </nav>
 
-                        <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                        v2.4 System Online
+            {/* Hero Section */}
+            <section className="relative pt-32 pb-20 px-6 overflow-hidden">
+                <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+
+                    {/* Left: Copy */}
+                    <div className="z-10 flex flex-col justify-center">
+
+                        {/* Elongated Pill / Divider */}
+                        <div className="w-full h-px bg-gradient-to-r from-transparent via-purple-500/50 to-transparent mb-8 relative">
+                            <div className="absolute top-1/2 left-0 -translate-y-1/2 bg-zinc-950 pr-4">
+                                <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-xs font-bold uppercase tracking-wider">
+                                    <span className="w-2 h-2 rounded-full bg-purple-500 animate-pulse" />
+                                    Consultant Operating System v2.0
+                                </span>
+                            </div>
+                        </div>
+
+                        <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-8 leading-[1.1] animate-in fade-in slide-in-from-bottom-8 duration-700">
+                            Bring Order to <br />
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-red-400 animate-pulse">
+                                Digital Chaos.
+                            </span>
+                        </h1>
+
+                        <p className="text-xl text-zinc-400 mb-10 leading-relaxed max-w-lg animate-in fade-in slide-in-from-bottom-12 duration-1000 delay-200">
+                            The comprehensive platform for AI Governance, Stack Discovery, and Strategic Maturity auditing.
+                            Turn ad-hoc tools into a sovereign architecture.
+                        </p>
+
+                        <div className="flex flex-col sm:flex-row gap-6 animate-in fade-in slide-in-from-bottom-16 duration-1000 delay-500">
+                            <button
+                                onClick={onLogin}
+                                className="group relative px-8 py-4 bg-white text-black rounded-lg font-bold text-lg flex items-center justify-center gap-2 overflow-hidden hover:scale-105 active:scale-95 transition-all duration-300"
+                            >
+                                <span className="relative z-10 flex items-center gap-2 group-hover:text-purple-600 transition-colors duration-300">
+                                    Start Engagement <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                                </span>
+                                <div className="absolute inset-0 bg-gradient-to-r from-purple-100 to-blue-100 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                            </button>
+                            <button className="px-8 py-4 bg-zinc-900 border border-zinc-800 text-zinc-300 rounded-lg font-bold text-lg hover:bg-zinc-800 hover:text-white hover:border-zinc-600 transition-all duration-300 hover:scale-105 active:scale-95">
+                                View Demo
+                            </button>
+                        </div>
+                        <div className="mt-12 flex items-center gap-8 text-sm text-zinc-500">
+                            <div className="flex items-center gap-2">
+                                <CheckCircle className="w-4 h-4 text-emerald-500" /> Enterprise Ready
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <CheckCircle className="w-4 h-4 text-emerald-500" /> SOC2 Compliant
+                            </div>
+                        </div>
                     </div>
 
-                    <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-8 leading-tight animate-in fade-in slide-in-from-bottom-6 duration-700">
-                        The Operating System for <br className="hidden md:block" />
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-zinc-500">Sovereign Consultants</span>
-                    </h1>
+                    {/* Right: Entropy Animation */}
+                    {/* User Req: "longer from text to end of page" -> Increased size + tighter left alignment */}
+                    <div className="relative flex flex-col justify-center items-start h-[600px] lg:-ml-20 w-full">
+                        {/* Gradient Glow */}
+                        <div className="absolute top-1/2 left-[400px] -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-purple-500/10 rounded-full blur-[100px] opacity-40" />
 
-                    <p className="text-xl text-zinc-400 mb-10 max-w-2xl mx-auto leading-relaxed animate-in fade-in slide-in-from-bottom-8 duration-700 delay-100">
-                        Auditing, Governance, and Orchestration in a single pane of glass.
-                        Move from "Time & Materials" to "Outcome Architecture".
-                    </p>
+                        {/* The Component - Larger Dimension */}
+                        <div className="relative z-10 animate-in zoom-in duration-1000 delay-300">
+                            <Entropy size={800} />
+                        </div>
 
-                    <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-in fade-in slide-in-from-bottom-10 duration-700 delay-200">
-                        <button
-                            onClick={onLogin}
-                            className="w-full sm:w-auto px-8 py-4 bg-white text-black text-base font-bold rounded-lg hover:bg-zinc-200 transition-all shadow-[0_0_20px_rgba(255,255,255,0.3)] hover:shadow-[0_0_30px_rgba(255,255,255,0.5)] flex items-center justify-center gap-2"
-                        >
-                            Initialize Engagement <ArrowRight className="w-5 h-5" />
-                        </button>
-                        <button className="w-full sm:w-auto px-8 py-4 bg-zinc-900 border border-zinc-700 text-white text-base font-bold rounded-lg hover:bg-zinc-800 transition-all">
-                            View Documentation
-                        </button>
+                        {/* Caption */}
+                        <div className="relative z-10 mt-2 text-center w-[800px] animate-in fade-in duration-1000 delay-700 pointer-events-none">
+                            <p className="text-sm tracking-widest uppercase text-zinc-600 opacity-60 font-mono">
+                                Order and Chaos Dance
+                            </p>
+                        </div>
                     </div>
                 </div>
             </section>
-
-            {/* Right: Entropy Animation */}
-            <div className="relative flex flex-col justify-center items-center h-[600px]">
-                {/* Gradient Glow */}
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-purple-500/20 rounded-full blur-[100px] opacity-50" />
-                
-                {/* The Component */}
-                <div className="relative z-10 animate-in zoom-in duration-1000 delay-300">
-                    <Entropy size={500} />
-                </div>
-                
-                {/* Caption */}
-                <div className="relative z-10 mt-6 text-center animate-in fade-in duration-1000 delay-700">
-                    <p className="text-sm tracking-widest uppercase text-zinc-500 font-mono">
-                        Order and Chaos Dance
-                    </p>
-                    <p className="text-xs text-zinc-600 font-serif italic mt-1">
-                        Digital poetry in motion. by <span className="text-purple-400">KainXu</span>
-                    </p>
-                </div>
-            </div>
 
             {/* Grid Features */}
             <section className="py-24 border-t border-white/5 relative bg-zinc-900/30">

@@ -23,8 +23,8 @@ export function Entropy({ className = "", size = 400 }: EntropyProps) {
         canvas.style.height = `${size}px`;
         ctx.scale(dpr, dpr);
 
-        // Theme Color (White for dark mode)
-        const particleColor = '#ffffff';
+        // Theme Colors
+        const colors = ['#a855f7', '#3b82f6', '#ec4899', '#10b981', '#f59e0b']; // Purple, Blue, Pink, Emerald, Amber
 
         class Particle {
             x: number;
@@ -36,13 +36,16 @@ export function Entropy({ className = "", size = 400 }: EntropyProps) {
             originalY: number;
             influence: number;
             neighbors: Particle[];
+            color: string;
+            twinkleSpeed: number;
+            twinklePhase: number;
 
             constructor(x: number, y: number, order: boolean) {
                 this.x = x;
                 this.y = y;
                 this.originalX = x;
                 this.originalY = y;
-                this.size = 2;
+                this.size = Math.random() * 2 + 1;
                 this.order = order;
                 this.velocity = {
                     x: (Math.random() - 0.5) * 2,
@@ -50,9 +53,13 @@ export function Entropy({ className = "", size = 400 }: EntropyProps) {
                 };
                 this.influence = 0;
                 this.neighbors = [];
+                // Assign a "hidden" color that only reveals when twinkling
+                this.color = colors[Math.floor(Math.random() * colors.length)];
+                this.twinkleSpeed = Math.random() * 0.05 + 0.02;
+                this.twinklePhase = Math.random() * Math.PI * 2;
             }
 
-            update() {
+            update(time: number) {
                 if (this.order) {
                     // Ordered particles influenced by chaos
                     const dx = this.originalX - this.x;
@@ -93,14 +100,30 @@ export function Entropy({ className = "", size = 400 }: EntropyProps) {
                 }
             }
 
-            draw(ctx: CanvasRenderingContext2D) {
+            draw(ctx: CanvasRenderingContext2D, time: number) {
+                // Twinkle Logic
+                const twinkle = Math.sin(time * this.twinkleSpeed + this.twinklePhase);
+                const normalizedTwinkle = (twinkle + 1) / 2; // 0 to 1
+
+                // Alpha calc - Make it brighter overall (0.4 to 1.0 range)
                 const alpha = this.order ?
-                    0.8 - this.influence * 0.5 :
-                    0.8;
-                ctx.fillStyle = `${particleColor}${Math.round(alpha * 255).toString(16).padStart(2, '0')}`;
+                    (0.9 - this.influence * 0.5) * (0.6 + normalizedTwinkle * 0.4) :
+                    0.9 * (0.6 + normalizedTwinkle * 0.4);
+
+                // Color Logic: Mostly bright white, very rare subtle color touches
+                // Threshold increased to 0.96 for "very small touches"
+                if (normalizedTwinkle > 0.96) {
+                    ctx.fillStyle = this.color;
+                    ctx.globalAlpha = alpha;
+                } else {
+                    ctx.fillStyle = '#ffffff';
+                    ctx.globalAlpha = alpha; // Removed the dimmer factor, keep it bright
+                }
+
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
                 ctx.fill();
+                ctx.globalAlpha = 1.0; // Reset
             }
         }
 
@@ -143,15 +166,17 @@ export function Entropy({ className = "", size = 400 }: EntropyProps) {
 
             // Update and draw all particles
             particles.forEach(particle => {
-                particle.update();
-                particle.draw(ctx);
+                particle.update(time);
+                particle.draw(ctx, time);
 
                 // Draw connections
                 particle.neighbors.forEach(neighbor => {
                     const distance = Math.hypot(particle.x - neighbor.x, particle.y - neighbor.y);
                     if (distance < 50) {
                         const alpha = 0.2 * (1 - distance / 50);
-                        ctx.strokeStyle = `${particleColor}${Math.round(alpha * 255).toString(16).padStart(2, '0')}`;
+
+                        // Lines are white
+                        ctx.strokeStyle = `rgba(255, 255, 255, ${alpha})`;
                         ctx.beginPath();
                         ctx.moveTo(particle.x, particle.y);
                         ctx.lineTo(neighbor.x, neighbor.y);
@@ -161,7 +186,7 @@ export function Entropy({ className = "", size = 400 }: EntropyProps) {
             });
 
             // Draw separator line
-            ctx.strokeStyle = `${particleColor}4D`;
+            ctx.strokeStyle = '#ffffff4D'; // Using a default white with alpha since particleColor is removed
             ctx.lineWidth = 0.5;
             ctx.beginPath();
             ctx.moveTo(size / 2, 0);
