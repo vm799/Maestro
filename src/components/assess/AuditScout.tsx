@@ -264,7 +264,10 @@ export function AuditScout() {
                             <Send className="w-4 h-4 ml-0.5" />
                         </button>
                         {step === 'complete' && (
-                            <button className="w-full mt-6 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-bold flex items-center justify-center gap-2 animate-pulse">
+                            <button
+                                onClick={() => window.dispatchEvent(new CustomEvent('navigate', { detail: 'roadmap' }))}
+                                className="w-full mt-6 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-bold flex items-center justify-center gap-2 animate-pulse hover:scale-105 transition-transform"
+                            >
                                 <CheckCircle className="w-4 h-4" /> View Remediation Plan
                             </button>
                         )}        </form>

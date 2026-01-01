@@ -92,7 +92,7 @@ export function StackMap() {
             <header className="px-8 py-6 border-b border-zinc-800 flex justify-between items-center bg-zinc-900/50">
                 <div>
                     <h1 className="text-2xl font-bold tracking-tight text-white flex items-center gap-2">
-                        <span className="text-red-500">Day 1:</span> The Stack Map
+                        <span className="text-primary">Phase 1:</span> Stack Discovery
                     </h1>
                     <p className="text-zinc-400 text-sm">Drag to arrange via integration flow (Left to Right).</p>
                 </div>

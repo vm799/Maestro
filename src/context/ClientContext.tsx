@@ -35,7 +35,7 @@ export interface ClientState {
     industry: string;
     costBasis: CostBasis;
 
-    // The Stack (Day 1 Input)
+    // The Stack (Phase 1 Input)
     stack: ToolNode[];
 
     // Assessment Data (The Audit)
