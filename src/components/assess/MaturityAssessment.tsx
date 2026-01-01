@@ -243,6 +243,58 @@ export function MaturityAssessment() {
                                 </div>
                             </div>
                         ))}
+
+                        {/* Section Complete / Continue Button */}
+                        {(() => {
+                            const sectionQuestions = activeSection.questions.map(q => q.id);
+                            const answeredInSection = sectionQuestions.filter(id => answers[id]).length;
+                            const sectionComplete = answeredInSection === sectionQuestions.length;
+                            const currentIndex = ASSESSMENT_RUBRIC.findIndex(s => s.id === activeTab);
+                            const isLastSection = currentIndex === ASSESSMENT_RUBRIC.length - 1;
+                            const allComplete = ASSESSMENT_RUBRIC.every(section =>
+                                section.questions.every(q => answers[q.id])
+                            );
+
+                            return (
+                                <div className="mt-8 pt-6 border-t border-zinc-800">
+                                    <div className="flex items-center justify-between">
+                                        <div className="text-sm text-zinc-500">
+                                            {answeredInSection}/{sectionQuestions.length} questions answered in this section
+                                        </div>
+
+                                        {sectionComplete && !isLastSection && (
+                                            <button
+                                                onClick={() => {
+                                                    const nextSection = ASSESSMENT_RUBRIC[currentIndex + 1];
+                                                    setActiveTab(nextSection.id);
+                                                }}
+                                                className="px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg transition-all flex items-center gap-2"
+                                            >
+                                                Continue to Stage {currentIndex + 2} →
+                                            </button>
+                                        )}
+
+                                        {sectionComplete && isLastSection && allComplete && (
+                                            <button
+                                                onClick={() => {
+                                                    window.dispatchEvent(new CustomEvent('navigate', { detail: 'roadmap' }));
+                                                }}
+                                                className="px-6 py-3 bg-gradient-to-r from-emerald-600 to-cyan-600 hover:from-emerald-500 hover:to-cyan-500 text-white font-bold rounded-lg transition-all flex items-center gap-2 shadow-lg"
+                                            >
+                                                Submit Assessment → View Remediation Plan
+                                            </button>
+                                        )}
+
+                                        {!sectionComplete && (
+                                            <div className="text-xs text-amber-500 flex items-center gap-2">
+                                                <AlertCircle className="w-4 h-4" />
+                                                Answer all questions to continue
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            );
+                        })()}
                     </div>
 
                     {/* Right: LIVE MATURITY SCALES */}

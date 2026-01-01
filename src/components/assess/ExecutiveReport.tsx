@@ -152,14 +152,84 @@ export function ExecutiveReport({ onClose, scores, rubric, answers }: ExecutiveR
                             </div>
                         </div>
 
+                        {/* Recommendations with Security Evidence */}
+                        <div className="border border-zinc-800 rounded-xl overflow-hidden bg-zinc-900/30">
+                            <div className="p-4 bg-amber-950/30 border-b border-amber-500/20 flex justify-between items-center">
+                                <h3 className="font-bold text-amber-400 flex items-center gap-2">
+                                    <AlertTriangle className="w-4 h-4" />
+                                    Recommended Remediations
+                                </h3>
+                                <span className="text-xs text-zinc-500">Prioritized by gap severity</span>
+                            </div>
+
+                            <div className="p-6 space-y-6">
+                                {scores.filter(s => s.score < 3).map((score, idx) => {
+                                    const recommendations: Record<string, { action: string; source: string; reference: string }> = {
+                                        'Stage I': {
+                                            action: 'Deploy enterprise AI Acceptable Use Policy and mandatory training program',
+                                            source: 'NIST AI RMF',
+                                            reference: 'NIST AI 100-1 (2023) - AI Risk Management Framework, Section 2.3: Governance'
+                                        },
+                                        'Stage II': {
+                                            action: 'Implement DLP monitoring for all AI tool traffic with PII detection',
+                                            source: 'ISO/IEC 27001:2022',
+                                            reference: 'ISO 27001 Control A.8.12 - Data Leakage Prevention'
+                                        }
+                                    };
+                                    const rec = recommendations[score.category] || {
+                                        action: 'Conduct gap assessment and implement controls',
+                                        source: 'SOC 2 Type II',
+                                        reference: 'AICPA TSC CC6.1 - Logical Access Controls'
+                                    };
+
+                                    return (
+                                        <div key={idx} className="bg-zinc-950/50 border border-zinc-800 rounded-xl p-5">
+                                            <div className="flex justify-between items-start mb-3">
+                                                <div>
+                                                    <div className="text-xs text-zinc-500 uppercase mb-1">Gap Identified: {score.category}</div>
+                                                    <div className="text-lg font-bold text-white">Score: {score.score.toFixed(1)}/4.0</div>
+                                                </div>
+                                                <div className={`px-3 py-1 rounded-full text-xs font-bold ${score.score < 2 ? 'bg-red-500/10 text-red-400 border border-red-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'}`}>
+                                                    {score.score < 2 ? 'CRITICAL' : 'MODERATE'}
+                                                </div>
+                                            </div>
+
+                                            <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-4 mb-3">
+                                                <div className="text-sm text-emerald-400 font-bold mb-1">Recommended Action:</div>
+                                                <div className="text-sm text-zinc-300">{rec.action}</div>
+                                            </div>
+
+                                            <div className="flex items-center gap-2 text-xs">
+                                                <Shield className="w-3 h-3 text-blue-400" />
+                                                <span className="text-blue-400 font-bold">{rec.source}</span>
+                                                <span className="text-zinc-500">|</span>
+                                                <span className="text-zinc-400 italic">{rec.reference}</span>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+
+                                {scores.filter(s => s.score < 3).length === 0 && (
+                                    <div className="text-center py-8 text-zinc-500">
+                                        <CheckCircle className="w-12 h-12 mx-auto mb-3 text-emerald-500" />
+                                        <div className="font-bold text-white">No Critical Gaps Detected</div>
+                                        <div className="text-sm">All scores above threshold. Proceed to optimization phase.</div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
                         {/* Call to Action */}
                         <div className="bg-gradient-to-r from-emerald-950/50 to-zinc-900 border border-emerald-500/20 rounded-xl p-8 text-center">
                             <h3 className="text-xl font-bold text-white mb-2">Remediation Roadmap Ready</h3>
                             <p className="text-zinc-400 max-w-2xl mx-auto mb-6">
-                                Based on these findings, we have generated a tailored implementation plan to close the identified compliance gaps and optimize stack efficiency.
+                                Based on these findings, we have generated a tailored implementation plan with {scores.filter(s => s.score < 3).length} priority items to close identified gaps.
                             </p>
                             <button
-                                onClick={onClose}
+                                onClick={() => {
+                                    onClose();
+                                    window.dispatchEvent(new CustomEvent('navigate', { detail: 'roadmap' }));
+                                }}
                                 className="px-8 py-3 bg-emerald-500 hover:bg-emerald-400 text-black font-bold rounded-lg transition-all hover:scale-105 shadow-lg shadow-emerald-500/20 flex items-center gap-2 mx-auto"
                             >
                                 View Remediation Plan <ArrowRight className="w-4 h-4" />
