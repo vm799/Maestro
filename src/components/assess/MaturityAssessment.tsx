@@ -41,7 +41,7 @@ export function MaturityAssessment() {
                                 onClick={() => setActiveTab(section.id)}
                                 className={`w-full text-left px-3 py-3 rounded-lg flex items-center gap-3 transition-all ${activeTab === section.id
                                     ? "bg-primary/10 text-primary border-primary/20 border"
-                                    : "hover:bg-secondary text-muted-foreground"
+                                    : "hover:bg-secondary text-zinc-600 dark:text-zinc-400 hover:text-foreground"
                                     }`}
                             >
                                 <section.icon className="w-5 h-5 shrink-0" />
