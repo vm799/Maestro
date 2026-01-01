@@ -2,12 +2,98 @@ import React, { useState } from 'react';
 import { ExecutiveReport } from './ExecutiveReport'; // Import the new component
 import { FileText, BookOpen, AlertCircle } from 'lucide-react'; // Assuming these are used and need to be imported
 
+const ASSESSMENT_RUBRIC = [
+    {
+        id: "literacy",
+        title: "I. AI Literacy: The Human OS",
+        description: "Evaluating the workforce's ability to safely and effectively utilize AI tools.",
+        icon: BookOpen,
+        questions: [
+            {
+                id: "l1",
+                text: "What percentage of your team uses AI daily?",
+                scoringGuide: {
+                    nonExistent: "< 5%: Initial experimental use only.",
+                    emerging: "5-20%: Early adopters leading the way.",
+                    systematic: "20-50%: Standardized tools in key workflows.",
+                    optimized: "> 50%: AI is embedded in the DNA of operations."
+                },
+                consultantContext: "Look for shadow IT vs sanctioned usage. High usage without training is a risk."
+            },
+            {
+                id: "l2",
+                text: "Is there formal training on Prompt Engineering?",
+                scoringGuide: {
+                    nonExistent: "None: Learning by osmosis/Twitter.",
+                    emerging: "Ad-hoc: Occasional workshops or shared docs.",
+                    systematic: "Documented: Internal wiki + onboarding modules.",
+                    optimized: "Certified: Certified courses & continuous learning."
+                },
+                consultantContext: "Quality of output depends on query quality. Check for 'lazy prompting' vs engineering."
+            },
+            {
+                id: "l3",
+                text: "Do employees understand 'Hallucinations'?",
+                scoringGuide: {
+                    nonExistent: "No clue: Blind trust in model outputs.",
+                    emerging: "Vague: 'It sometimes makes mistakes.'",
+                    systematic: "Aware: Verification protocols in place.",
+                    optimized: "Expert: Techniques to ground and verify truth."
+                },
+                consultantContext: "Critical for risk. If financial/legal decisions are made on hallucinations, liability is high."
+            }
+        ]
+    },
+    {
+        id: "policy",
+        title: "II. Policy & Governance: The Shield",
+        description: "Assessing the legal and ethical frameworks surrounding AI usage.",
+        icon: AlertCircle,
+        questions: [
+            {
+                id: "p1",
+                text: "Is there a clear 'Acceptable Use Policy'?",
+                scoringGuide: {
+                    nonExistent: "No: Wild West.",
+                    emerging: "Draft: Legal is looking at it.",
+                    systematic: "Published: Accessible in Intranet.",
+                    optimized: "Enforced: Technical guardrails prevent violations."
+                },
+                consultantContext: "A policy in a drawer is useless. Look for technical enforcement (CASB, blockers)."
+            },
+            {
+                id: "p2",
+                text: "Are confidential data flows monitored?",
+                scoringGuide: {
+                    nonExistent: "No: Data flows freely to public models.",
+                    emerging: "Manual: Periodic audits or honors system.",
+                    systematic: "DLP: Basic alerts on PII/Secrets.",
+                    optimized: "Blocked: Real-time prevention of sensitive egress."
+                },
+                consultantContext: "The #1 enterprise risk. Check if employees paste customer/code data into ChatGPT."
+            }
+        ]
+    }
+];
+
 export function MaturityAssessment() {
     const [activeTab, setActiveTab] = useState<string>("literacy");
     const [answers, setAnswers] = useState<Record<string, number>>({});
-    const [showReport, setShowReport] = useState(false); // State for modal
+    const [showReport, setShowReport] = useState(false);
 
-    // ... existing logic ...
+    // Derived State
+    const activeSection = ASSESSMENT_RUBRIC.find(s => s.id === activeTab) || ASSESSMENT_RUBRIC[0];
+
+    const handleScore = (questionId: string, score: number) => {
+        setAnswers(prev => ({ ...prev, [questionId]: score }));
+    };
+
+    const calculateTotal = () => {
+        const scores = Object.values(answers);
+        if (scores.length === 0) return "0.0";
+        const total = scores.reduce((a, b) => a + b, 0);
+        return (total / scores.length).toFixed(1);
+    };
 
     // Helper to format scores for the report
     const getFormattedScores = () => {
@@ -25,6 +111,8 @@ export function MaturityAssessment() {
                 <ExecutiveReport
                     onClose={() => setShowReport(false)}
                     scores={getFormattedScores()}
+                    rubric={ASSESSMENT_RUBRIC}
+                    answers={answers}
                 />
             )}
 
@@ -107,10 +195,10 @@ export function MaturityAssessment() {
                                                         {answers[q.id] === score && <div className="w-2 h-2 rounded-full bg-primary" />}
                                                     </div>
                                                     <p className="text-zinc-400 text-xs leading-relaxed">
-                                                        {score === 1 ? q.scoringGuide.nonExistent :
-                                                            score === 2 ? q.scoringGuide.emerging :
-                                                                score === 3 ? q.scoringGuide.systematic :
-                                                                    q.scoringGuide.optimized}
+                                                        {score === 1 ? q.scoringGuide?.nonExistent :
+                                                            score === 2 ? q.scoringGuide?.emerging :
+                                                                score === 3 ? q.scoringGuide?.systematic :
+                                                                    q.scoringGuide?.optimized}
                                                     </p>
                                                 </button>
                                             ))}
