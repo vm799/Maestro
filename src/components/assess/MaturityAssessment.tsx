@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { ASSESSMENT_RUBRIC, AssessmentSection, Question } from '../../data/assessment_rubric';
+import { ASSESSMENT_RUBRIC } from '../../data/assessment_rubric';
+import type { AssessmentSection, Question } from '../../data/assessment_rubric';
 import { ChevronRight, Info, BookOpen, AlertCircle, FileText } from 'lucide-react';
 
 export function MaturityAssessment() {
@@ -39,8 +40,8 @@ export function MaturityAssessment() {
                                 key={section.id}
                                 onClick={() => setActiveTab(section.id)}
                                 className={`w-full text-left px-3 py-3 rounded-lg flex items-center gap-3 transition-all ${activeTab === section.id
-                                        ? "bg-primary/10 text-primary border-primary/20 border"
-                                        : "hover:bg-secondary text-muted-foreground"
+                                    ? "bg-primary/10 text-primary border-primary/20 border"
+                                    : "hover:bg-secondary text-muted-foreground"
                                     }`}
                             >
                                 <section.icon className="w-5 h-5 shrink-0" />
@@ -78,14 +79,14 @@ export function MaturityAssessment() {
                                                     key={score}
                                                     onClick={() => handleScore(q.id, score)}
                                                     className={`p-3 rounded-lg border text-left text-sm transition-all h-full ${answers[q.id] === score
-                                                            ? "ring-2 ring-primary border-transparent bg-primary/5"
-                                                            : "border-border hover:border-primary/50"
+                                                        ? "ring-2 ring-primary border-transparent bg-primary/5"
+                                                        : "border-border hover:border-primary/50"
                                                         }`}
                                                 >
                                                     <div className="flex items-center justify-between mb-2">
                                                         <span className={`text-xs font-bold uppercase tracking-wider ${score === 1 ? "text-red-500" :
-                                                                score === 2 ? "text-amber-500" :
-                                                                    score === 3 ? "text-blue-500" : "text-emerald-500"
+                                                            score === 2 ? "text-amber-500" :
+                                                                score === 3 ? "text-blue-500" : "text-emerald-500"
                                                             }`}>
                                                             {score === 1 ? "Level 1: Ad-Hoc" :
                                                                 score === 2 ? "Level 2: Emerging" :
