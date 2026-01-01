@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { LayoutDashboard, Users, BarChart3, PenTool, Settings, Menu, ChevronRight, Search, Activity } from 'lucide-react';
 import { MaturityAssessment } from '../assess/MaturityAssessment';
 import { ContentStudio } from '../studio/ContentStudio';
-import { MessMap } from '../onboarding/MessMap';
+import { StackMap } from '../onboarding/StackMap';
 import { AIOpsDashboard } from '../governance/AIOpsDashboard';
 import { AuditScout } from '../assess/AuditScout';
 import { Dashboard } from '../Dashboard'; // Keeping old dashboard as "Project View" for now, or determining how to integrate
@@ -24,7 +24,7 @@ export function MainLayout() {
 
     const renderContent = () => {
         switch (activeView) {
-            case 'messmap': return <MessMap />;
+            case 'stackmap': return <StackMap />;
             case 'scout': return <AuditScout />;
             case 'assess': return <MaturityAssessment />;
             case 'studio': return <ContentStudio />;
@@ -54,9 +54,9 @@ export function MainLayout() {
                     />
                     <div className="my-4 border-t border-zinc-800" />
                     <NavItem
-                        icon={LayoutDashboard} label="Day 1: The Mess Map"
-                        active={activeView === 'messmap'} collapsed={!sidebarOpen}
-                        onClick={() => setActiveView('messmap')}
+                        icon={LayoutDashboard} label="Day 1: The Stack Map"
+                        active={activeView === 'stackmap'} collapsed={!sidebarOpen}
+                        onClick={() => setActiveView('stackmap')}
                     />
                     <NavItem
                         icon={Search} label="Audit Scout"

@@ -21,24 +21,24 @@ const AVAILABLE_TOOLS = [
     { id: 'outlook', name: 'Outlook', category: 'email', icon: Mail },
 ];
 
-export function MessMap() {
-    const [activeTools, setActiveTools] = useState<ToolNode[]>([]);
-    const [frictionScore, setFrictionScore] = useState(0);
+import { useClient } from '../../context/ClientContext';
 
-    const addTool = (toolTemplate: any) => {
+export function StackMap() {
+    const { stack, addTool: ctxAddTool, removeTool: ctxRemoveTool, frictionCost, identifiedRisks } = useClient();
+    // We keep the "template" tool logic local for the palette, but state goes to context
+
+    const handleAddTool = (toolTemplate: any) => {
         const newTool = {
             ...toolTemplate,
             id: `${toolTemplate.id}-${Date.now()}`,
             x: Math.random() * 400 + 50,
             y: Math.random() * 300 + 50
         };
-        setActiveTools([...activeTools, newTool]);
-        if (toolTemplate.risky) setFrictionScore(s => s + 25);
+        ctxAddTool(newTool);
     };
 
-    const removeTool = (id: string, risky?: boolean) => {
-        setActiveTools(activeTools.filter(t => t.id !== id));
-        if (risky) setFrictionScore(s => s - 25);
+    const handleRemoveTool = (id: string) => {
+        ctxRemoveTool(id);
     };
 
     return (
@@ -46,15 +46,15 @@ export function MessMap() {
             <header className="px-8 py-6 border-b border-zinc-800 flex justify-between items-center bg-zinc-900/50">
                 <div>
                     <h1 className="text-2xl font-bold tracking-tight text-white flex items-center gap-2">
-                        <span className="text-red-500">Day 1:</span> The Mess Map
+                        <span className="text-red-500">Day 1:</span> The Stack Map
                     </h1>
                     <p className="text-zinc-400 text-sm">Drag your tools onto the canvas. Be honest.</p>
                 </div>
                 <div className="flex items-center gap-4">
                     <div className="text-right">
                         <div className="text-[10px] uppercase font-bold tracking-wider text-zinc-500">Projected Friction</div>
-                        <div className={`text-xl font-bold font-mono ${frictionScore > 0 ? "text-red-500" : "text-emerald-500"}`}>
-                            ${frictionScore * 150}/mo
+                        <div className={`text-xl font-bold font-mono ${frictionCost > 0 ? "text-red-500" : "text-emerald-500"}`}>
+                            ${frictionCost.toLocaleString()}/mo
                         </div>
                     </div>
                     <button className="bg-white text-black hover:bg-zinc-200 px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2">
@@ -71,7 +71,7 @@ export function MessMap() {
                         {AVAILABLE_TOOLS.map(tool => (
                             <button
                                 key={tool.id}
-                                onClick={() => addTool(tool)}
+                                onClick={() => handleAddTool(tool)}
                                 className="w-full flex items-center gap-3 p-3 rounded-lg border border-zinc-700 bg-zinc-800 hover:border-zinc-500 transition-all group"
                             >
                                 <div className={`p-2 rounded-md ${tool.risky ? "bg-red-500/20 text-red-500" : "bg-zinc-700 text-zinc-300"}`}>
@@ -91,7 +91,7 @@ export function MessMap() {
 
                 {/* The Canvas */}
                 <div className="flex-1 relative bg-[radial-gradient(#27272a_1px,transparent_1px)] [background-size:16px_16px] overflow-hidden">
-                    {activeTools.length === 0 && (
+                    {stack.length === 0 && (
                         <div className="absolute inset-0 flex items-center justify-center text-zinc-600 pointer-events-none">
                             <p className="text-lg font-medium">Drag tools here to map your silos.</p>
                         </div>
@@ -99,12 +99,12 @@ export function MessMap() {
 
                     {/* Render Connections (Simulated Manual Bridges) */}
                     <svg className="absolute inset-0 pointer-events-none">
-                        {activeTools.map((t1, i) =>
-                            activeTools.slice(i + 1).map((t2) => (
+                        {stack.map((t1, i) =>
+                            stack.slice(i + 1).map((t2) => (
                                 <line
                                     key={`${t1.id}-${t2.id}`}
-                                    x1={t1.x + 20} y1={t1.y + 20}
-                                    x2={t2.x + 20} y2={t2.y + 20}
+                                    x1={t1.x! + 20} y1={t1.y! + 20}
+                                    x2={t2.x! + 20} y2={t2.y! + 20}
                                     stroke={t1.category !== t2.category ? "#b91c1c" : "#27272a"} // Red if cross-category (Manual Bridge assumption)
                                     strokeWidth="2"
                                     strokeDasharray={t1.category !== t2.category ? "5,5" : "0"}
@@ -115,19 +115,19 @@ export function MessMap() {
                     </svg>
 
                     {/* Render Nodes */}
-                    {activeTools.map((tool, idx) => (
+                    {stack.map((tool) => (
                         <div
                             key={tool.id}
                             className={`absolute p-4 rounded-xl border-2 shadow-2xl cursor-grab active:cursor-grabbing backdrop-blur-sm transition-all animate-in zoom-in duration-300 ${tool.risky
-                                    ? "bg-red-950/40 border-red-500/50 shadow-red-900/20"
-                                    : "bg-zinc-800/80 border-zinc-600 shadow-black/50"
+                                ? "bg-red-950/40 border-red-500/50 shadow-red-900/20"
+                                : "bg-zinc-800/80 border-zinc-600 shadow-black/50"
                                 }`}
                             style={{ left: tool.x, top: tool.y }}
                         >
                             <div className="flex items-center gap-3">
                                 <tool.icon className={`w-5 h-5 ${tool.risky ? "text-red-500" : "text-zinc-400"}`} />
                                 <span className="font-bold text-sm text-white">{tool.name}</span>
-                                <button onClick={() => removeTool(tool.id, tool.risky)} className="text-zinc-500 hover:text-white ml-2">
+                                <button onClick={() => ctxRemoveTool(tool.id)} className="text-zinc-500 hover:text-white ml-2">
                                     <X className="w-3 h-3" />
                                 </button>
                             </div>
@@ -140,14 +140,14 @@ export function MessMap() {
                     ))}
 
                     {/* Contextual Insight Bubble */}
-                    {activeTools.some(t => t.risky) && (
+                    {identifiedRisks.length > 0 && (
                         <div className="absolute bottom-8 right-8 max-w-sm bg-zinc-900 border border-red-500/30 p-4 rounded-xl shadow-2xl animate-in slide-in-from-bottom">
                             <div className="flex items-start gap-3">
                                 <div className="p-2 bg-red-500/10 rounded-lg"><AlertTriangle className="w-5 h-5 text-red-500" /></div>
                                 <div>
                                     <h4 className="text-sm font-bold text-red-400 mb-1">Risk Detected</h4>
                                     <p className="text-xs text-zinc-400">
-                                        You have unmanaged AI tools connected to corporate email. This is a potential <b>ISO 42001 violation</b>.
+                                        {identifiedRisks.length} critical issues found. Total Impact: <span className="text-white font-mono">${frictionCost}/mo</span>.
                                     </p>
                                 </div>
                             </div>

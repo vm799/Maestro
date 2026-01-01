@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Send, Bot, User, AlertTriangle, CheckCircle } from 'lucide-react';
+import { Send, Bot, Shield, Zap, AlertTriangle, CheckCircle } from 'lucide-react';
 
 interface Message {
     id: string;
@@ -8,21 +8,40 @@ interface Message {
     isQuestion?: boolean;
 }
 
+// The "Shield & Spear" Question Bank
 const QUESTIONS = [
-    "Let's be brutally honest. How many different AI tools are you *actually* using right now? (Include the 'Shadow AI'—stuff on personal cards).",
-    "When your main bot finishes a task, do you have to manually copy-paste that info into another tool? If yes, how many hours a week is that costing you?",
-    "How often does the AI get stuck in a loop or hallucinate, forcing you to jump in? Is there a formal 'panic button' for this?",
-    "Can you show me a single dashboard that proves the ROI of these tools, or is everyone just saying 'it's going great'?",
-    "On a scale of 1-10, how much 'tool fatigue' are you feeling? Is the AI making you productive or just busy?"
+    // Shield (Security)
+    {
+        type: "shield",
+        text: "Reviewing your Stack Map... I see 3 tools connected to email. Be precise: Do you have a DLP (Data Loss Prevention) policy for them?"
+    },
+    // Spear (Culture/Literacy)
+    {
+        type: "spear",
+        text: "Let's talk about the team. When you rolled out that last tool, did employees ignore it? (Honest answer: Yes/No)"
+    },
+    // Shield (Governance)
+    {
+        type: "shield",
+        text: "Who has the 'Kill Switch' if an agent starts halluncinating at 2 AM? Is there a human on call?"
+    },
+    // Spear (Strategy)
+    {
+        type: "spear",
+        text: "Are you using AI to cut costs (Survival) or creates new revenue (Growth)? Most companies lie about this."
+    }
 ];
 
 export function AuditScout() {
     const [messages, setMessages] = useState<Message[]>([
-        { id: '1', sender: 'bot', text: "I'm the Audit Scout. I'm here to find out if your AI is actually working or just making noise. Ready to be honest?", isQuestion: true }
+        { id: '1', sender: 'bot', text: "I've analyzed your Stack Map. I have 4 questions to determine your Risk Profile vs. Growth Potential.", isQuestion: true }
     ]);
     const [inputText, setInputText] = useState('');
-    const [currentQuestionIndex, setCurrentQuestionIndex] = useState(-1); // -1 means intro
+    const [currentQuestionIndex, setCurrentQuestionIndex] = useState(-1);
     const [isTyping, setIsTyping] = useState(false);
+    const [shieldScore, setShieldScore] = useState(0); // Risk detected
+    const [spearScore, setSpearScore] = useState(0);   // Opportunity detected
+
     const scrollRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -40,21 +59,30 @@ export function AuditScout() {
         setInputText('');
         setIsTyping(true);
 
+        // Analyze Answer (Simulated)
+        // In a real app, we'd use an LLM here to classify the sentiment/content
+        if (currentQuestionIndex >= 0) {
+            const type = QUESTIONS[currentQuestionIndex].type;
+            if (type === 'shield' && (inputText.toLowerCase().includes('no') || inputText.toLowerCase().includes('don\'t'))) {
+                setShieldScore(s => s + 1); // High Risk
+            }
+            if (type === 'spear' && (inputText.toLowerCase().includes('ignore') || inputText.toLowerCase().includes('cost'))) {
+                setSpearScore(s => s + 1); // Low Maturity
+            }
+        }
+
         // Simulate bot thinking delay
         setTimeout(() => {
             let nextMsgText = "";
             let nextIndex = currentQuestionIndex + 1;
 
             if (currentQuestionIndex === -1) {
-                // First actual question
-                nextMsgText = QUESTIONS[0];
+                nextMsgText = QUESTIONS[0].text;
             } else if (currentQuestionIndex < QUESTIONS.length - 1) {
-                // Next question
-                nextMsgText = QUESTIONS[nextIndex];
+                nextMsgText = QUESTIONS[nextIndex].text;
             } else {
-                // End of interview
-                nextMsgText = "Thanks. I've seen enough. I'm generating your 'Friction Scorecard' now. It's... eye-opening.";
-                nextIndex = currentQuestionIndex; // Stay at end
+                nextMsgText = "Analysis Complete. I'm generating your 'Shield & Spear' report now.";
+                nextIndex = currentQuestionIndex;
             }
 
             const botMsg: Message = { id: (Date.now() + 1).toString(), sender: 'bot', text: nextMsgText, isQuestion: true };
@@ -114,7 +142,7 @@ export function AuditScout() {
                             autoFocus
                             value={inputText}
                             onChange={e => setInputText(e.target.value)}
-                            placeholder="Type your answer..."
+                            placeholder="Type your answer... be honest."
                             className="flex-1 bg-background border border-input rounded-full px-4 py-3 text-sm focus:ring-2 focus:ring-primary outline-none"
                         />
                         <button
@@ -128,33 +156,51 @@ export function AuditScout() {
                 </div>
             </div>
 
-            {/* Live Analysis (The "Trojan Horse" reveal) */}
+            {/* Live "Shield & Spear" Analysis */}
             <div className="w-80 hidden xl:block space-y-6">
-                <div className="bg-card border border-border rounded-xl p-6">
-                    <h4 className="font-bold text-sm mb-4 flex items-center gap-2">
-                        <AlertTriangle className="w-4 h-4 text-amber-500" /> Friction Detected
+
+                {/* Shield Card (Security) */}
+                <div className={`bg-card border rounded-xl p-6 transition-all duration-500 ${shieldScore > 0 ? "border-red-500/50 shadow-lg shadow-red-500/10" : "border-border"}`}>
+                    <h4 className="font-bold text-sm mb-4 flex items-center justify-between">
+                        <span className="flex items-center gap-2"><Shield className={`w-4 h-4 ${shieldScore > 0 ? "text-red-500" : "text-muted-foreground"}`} /> Shield Status</span>
+                        <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded ${shieldScore > 0 ? "bg-red-500/20 text-red-500" : "bg-secondary text-muted-foreground"}`}>
+                            {shieldScore > 0 ? "Vulnerable" : "Scanning"}
+                        </span>
                     </h4>
                     <div className="space-y-4">
-                        {/* Faked dynamic detection based on progress */}
-                        {messages.length > 2 && (
-                            <div className="p-3 bg-destructive/10 text-destructive rounded-lg border border-destructive/20 animate-in slide-in-from-right fade-in">
-                                <div className="text-xs font-bold uppercase mb-1">Alert: Shadow AI</div>
-                                <p className="text-xs">Unregulated tools mentioned. Security Risk: High.</p>
-                            </div>
-                        )}
-                        {messages.length > 4 && (
-                            <div className="p-3 bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-lg border border-amber-500/20 animate-in slide-in-from-right fade-in">
-                                <div className="text-xs font-bold uppercase mb-1">Inefficiency: Manual Bridge</div>
-                                <p className="text-xs">Human copying data between bots. Automation failure.</p>
+                        {shieldScore > 0 && (
+                            <div className="p-3 bg-red-500/10 text-red-600 dark:text-red-400 rounded-lg border border-red-500/20 animate-in slide-in-from-right fade-in">
+                                <div className="text-xs font-bold uppercase mb-1">Gaps Detected</div>
+                                <p className="text-xs">Missing DLP Policy. Shadow AI active w/o Kill Switch.</p>
                             </div>
                         )}
                     </div>
-                    {currentQuestionIndex >= 4 && (
-                        <button className="w-full mt-6 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-bold flex items-center justify-center gap-2 animate-pulse">
-                            <CheckCircle className="w-4 h-4" /> View Solution Proposal
-                        </button>
-                    )}
                 </div>
+
+                {/* Spear Card (Culture) */}
+                <div className={`bg-card border rounded-xl p-6 transition-all duration-500 ${spearScore > 0 ? "border-amber-500/50 shadow-lg shadow-amber-500/10" : "border-border"}`}>
+                    <h4 className="font-bold text-sm mb-4 flex items-center justify-between">
+                        <span className="flex items-center gap-2"><Zap className={`w-4 h-4 ${spearScore > 0 ? "text-amber-500" : "text-muted-foreground"}`} /> Spear Status</span>
+                        <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded ${spearScore > 0 ? "bg-amber-500/20 text-amber-500" : "bg-secondary text-muted-foreground"}`}>
+                            {spearScore > 0 ? "Resistance" : "Scanning"}
+                        </span>
+                    </h4>
+                    <div className="space-y-4">
+                        {spearScore > 0 && (
+                            <div className="p-3 bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-lg border border-amber-500/20 animate-in slide-in-from-right fade-in">
+                                <div className="text-xs font-bold uppercase mb-1">Adoption Friction</div>
+                                <p className="text-xs">Team ignoring tools. Strategy focused on cutting costs vs growth.</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                {currentQuestionIndex >= 4 && (
+                    <button className="w-full mt-6 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-bold flex items-center justify-center gap-2 animate-pulse">
+                        <CheckCircle className="w-4 h-4" /> View Remediation Plan
+                    </button>
+                )}
+
             </div>
         </div>
     );
