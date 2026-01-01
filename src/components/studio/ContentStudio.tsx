@@ -149,12 +149,35 @@ export function ContentStudio() {
                     <div className="max-w-2xl w-full bg-background border border-border rounded-xl shadow-sm min-h-[500px] flex flex-col relative">
                         <div className="p-4 border-b border-border flex justify-between items-center bg-muted/20 rounded-t-xl">
                             <span className="text-xs font-mono text-muted-foreground">preview.md</span>
-                            <button
-                                className="p-2 hover:bg-muted rounded text-muted-foreground transition-colors"
-                                title="Copy to Clipboard"
-                            >
-                                <Copy className="w-4 h-4" />
-                            </button>
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={() => {
+                                        navigator.clipboard.writeText(generatedContent);
+                                        alert('Copied to clipboard!');
+                                    }}
+                                    disabled={!generatedContent}
+                                    className="p-2 hover:bg-muted rounded text-muted-foreground transition-colors disabled:opacity-30"
+                                    title="Copy to Clipboard"
+                                >
+                                    <Copy className="w-4 h-4" />
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        const blob = new Blob([generatedContent], { type: 'text/plain' });
+                                        const url = URL.createObjectURL(blob);
+                                        const a = document.createElement('a');
+                                        a.href = url;
+                                        a.download = `${activeTab}-content.txt`;
+                                        a.click();
+                                        URL.revokeObjectURL(url);
+                                    }}
+                                    disabled={!generatedContent}
+                                    className="p-2 hover:bg-muted rounded text-muted-foreground transition-colors disabled:opacity-30"
+                                    title="Download as TXT"
+                                >
+                                    <Download className="w-4 h-4" />
+                                </button>
+                            </div>
                         </div>
 
                         <div className="p-8 flex-1 font-serif text-lg leading-relaxed whitespace-pre-wrap text-foreground/90">

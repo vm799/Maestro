@@ -43,6 +43,14 @@ export interface ClientState {
     spearScore: number;  // 0-100 (Culture/Adoption)
     frictionCost: number; // Estimated monthly waste
 
+    // NEW: Maturity Scales (from Phase 1.5 Assessment)
+    maturityScores: {
+        literacy: number;      // 0-4 scale
+        governance: number;    // 0-4 scale
+        adoption: number;      // 0-4 scale (future)
+        overall: number;       // Average
+    };
+
     // The "Mess" Findings
     identifiedRisks: Risk[];
 
@@ -53,6 +61,7 @@ export interface ClientState {
     reportRisk: (risk: Risk) => void;
     updateScores: (shieldDelta: number, spearDelta: number) => void;
     updateCostBasis: (basis: Partial<CostBasis>) => void;
+    setMaturityScores: (scores: { literacy: number; governance: number; adoption?: number }) => void;
 }
 
 // --- Context ---
@@ -64,6 +73,14 @@ export function ClientProvider({ children }: { children: ReactNode }) {
     const [identifiedRisks, setRisks] = useState<Risk[]>([]);
     const [shieldScore, setShieldScore] = useState(100); // Start perfect, drop as we find problems
     const [spearScore, setSpearScore] = useState(50);    // Start neutral
+
+    // NEW: Maturity Scores state
+    const [maturityScores, setMaturityScoresState] = useState({
+        literacy: 0,
+        governance: 0,
+        adoption: 0,
+        overall: 0
+    });
 
     // Default Assumptions (Validatable)
     const [costBasis, setCostBasis] = useState<CostBasis>({
@@ -114,6 +131,17 @@ export function ClientProvider({ children }: { children: ReactNode }) {
         setSpearScore(s => Math.min(100, Math.max(0, s + spearDelta)));
     };
 
+    const setMaturityScores = (scores: { literacy: number; governance: number; adoption?: number }) => {
+        const adoption = scores.adoption ?? 0;
+        const overall = (scores.literacy + scores.governance + adoption) / (adoption > 0 ? 3 : 2);
+        setMaturityScoresState({
+            literacy: scores.literacy,
+            governance: scores.governance,
+            adoption,
+            overall: Number(overall.toFixed(1))
+        });
+    };
+
     return (
         <ClientContext.Provider value={{
             companyName: "Acme Corp", // Placeholder
@@ -123,13 +151,15 @@ export function ClientProvider({ children }: { children: ReactNode }) {
             shieldScore,
             spearScore,
             frictionCost,
+            maturityScores,
             identifiedRisks,
             addTool,
             updateToolPosition,
             removeTool,
             reportRisk,
             updateScores,
-            updateCostBasis: (basis) => setCostBasis(prev => ({ ...prev, ...basis }))
+            updateCostBasis: (basis) => setCostBasis(prev => ({ ...prev, ...basis })),
+            setMaturityScores
         }}>
             {children}
         </ClientContext.Provider>

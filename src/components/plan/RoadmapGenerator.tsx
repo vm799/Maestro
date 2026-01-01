@@ -1,209 +1,263 @@
 import React, { useState, useEffect } from 'react';
 import { useClient } from '../../context/ClientContext';
-import { Target, ArrowRight, Shield, Zap, CheckCircle, Lock, Clock, Wrench, ChevronRight, DollarSign, X, FileText, Download } from 'lucide-react';
+import { Target, ArrowRight, Shield, Zap, CheckCircle, Lock, Clock, Wrench, ChevronRight, DollarSign, X, FileText, Download, BookOpen, AlertCircle } from 'lucide-react';
 
 export function RoadmapGenerator() {
-    const { identifiedRisks, frictionCost, shieldScore, spearScore } = useClient();
+    const { identifiedRisks, frictionCost, shieldScore, spearScore, maturityScores } = useClient();
     const [selectedItem, setSelectedItem] = useState<any>(null);
 
-    // Logic: No Assumptions. Derive Plan from Real Risks + Maturity.
+    // DYNAMIC: Generate remediation based on actual gaps
+    const literacyGap = 4 - maturityScores.literacy;
+    const governanceGap = 4 - maturityScores.governance;
+
+    // Determine which scale needs more attention
+    const priorityArea = literacyGap > governanceGap ? 'literacy' : 'governance';
+
+    // Build dynamic remediation items based on gaps
+    const buildLiteracyItems = () => {
+        const items: any[] = [];
+        if (maturityScores.literacy < 2) {
+            items.push({
+                title: 'CRITICAL: Launch Emergency AI Training Program',
+                type: 'critical',
+                tools: ['Internal LMS', 'Workshops'],
+                est: '2 weeks',
+                icon: BookOpen,
+                scale: 'literacy',
+                deliverable: {
+                    type: 'Training Deck',
+                    markdown: `# Emergency AI Literacy Bootcamp\n\n**Gap Identified:** Literacy Score ${maturityScores.literacy}/4.0\n\n## Week 1: Foundations\n- What is an LLM?\n- Prompt Engineering 101\n- Understanding Hallucinations\n\n## Week 2: Hands-On\n- Approved Tools Walkthrough\n- Best Practices & Guardrails\n- Quiz & Certification`
+                }
+            });
+        }
+        if (maturityScores.literacy < 3) {
+            items.push({
+                title: 'Deploy Prompt Engineering Certification',
+                type: 'training',
+                tools: ['LMS', 'Notion'],
+                est: '1 week',
+                icon: CheckCircle,
+                scale: 'literacy',
+                deliverable: {
+                    type: 'Certification Module',
+                    markdown: `# Prompt Engineering Certification\n\n**Target:** Move from Level ${Math.round(maturityScores.literacy)} to Level 3 (Systematic)\n\n## Curriculum\n1. Zero-shot vs Few-shot prompting\n2. Chain-of-thought reasoning\n3. Output formatting and validation\n\n**Pass Mark:** 80% on assessment`
+                }
+            });
+        }
+        return items;
+    };
+
+    const buildGovernanceItems = () => {
+        const items: any[] = [];
+        if (maturityScores.governance < 2) {
+            items.push({
+                title: 'URGENT: Draft Acceptable Use Policy',
+                type: 'critical',
+                tools: ['Legal', 'Compliance'],
+                est: '1 week',
+                icon: Shield,
+                scale: 'governance',
+                deliverable: {
+                    type: 'Policy Template',
+                    markdown: `# AI Acceptable Use Policy (DRAFT)\n\n**Gap Identified:** Governance Score ${maturityScores.governance}/4.0 - No policy exists.\n\n## Scope\nAll employees using AI tools for work purposes.\n\n## Prohibited Actions\n- Uploading customer PII to public AI platforms\n- Using AI outputs without human review in legal/financial contexts\n\n## Enforcement\nViolations escalated to HR and CISO.`
+                }
+            });
+        }
+        if (maturityScores.governance < 3) {
+            items.push({
+                title: 'Implement DLP Monitoring for AI Tools',
+                type: 'governance',
+                tools: ['Microsoft Purview', 'Netskope'],
+                est: '2 weeks',
+                icon: AlertCircle,
+                scale: 'governance',
+                deliverable: {
+                    type: 'DLP Configuration',
+                    markdown: `# DLP for AI Traffic\n\n**Objective:** Move from Level ${Math.round(maturityScores.governance)} to Level 3\n\n## Configuration\n1. Block outbound traffic to unsanctioned AI endpoints\n2. Monitor paste operations containing SSN/Credit Card patterns\n3. Alert on bulk document uploads to ChatGPT domains`
+                }
+            });
+        }
+        if (identifiedRisks.length > 0) {
+            items.push({
+                title: `Remediate ${identifiedRisks.length} Shadow AI Risks`,
+                type: 'governance',
+                tools: ['Drata', 'Vanta'],
+                est: '1 week per risk',
+                icon: Shield,
+                scale: 'governance',
+                deliverable: {
+                    type: 'Risk Register',
+                    markdown: `# Shadow AI Risk Remediation\n\n${identifiedRisks.map((r, i) => `## Risk ${i + 1}: ${r.description}\n- Severity: ${r.severity}\n- Action: Remove or replace with sanctioned alternative\n`).join('\n')}`
+                }
+            });
+        }
+        return items;
+    };
+
+    // Assemble phases based on actual gaps
     const phases = [
         {
-            title: 'Phase 1: Stabilization',
-            color: 'from-amber-400 to-orange-500',
+            title: `Phase 1: ${priorityArea === 'governance' ? 'Governance Lockdown' : 'Literacy Uplift'}`,
+            color: priorityArea === 'governance' ? 'from-amber-400 to-orange-500' : 'from-blue-400 to-indigo-500',
             duration: 'Weeks 1-4',
-            description: "Stop the bleeding. Lock down critical risks and establish a cost baseline.",
-            items: [
-                ...identifiedRisks.map(risk => ({
-                    title: `Remediate ${risk.description}`,
-                    type: 'governance',
-                    tools: ['Drata', 'Vanta'],
-                    est: '1 week',
-                    icon: Shield,
-                    deliverable: {
-                        type: 'Implementation Guide',
-                        markdown: `# Remediation Protocol: ${risk.description}\n\n**Severity Level:** ${risk.severity.toUpperCase()}\n\n## Step 1: Isolation\nImmediately restrict access to the affected endpoint or service. Update IAM policies to enforce least-privilege access.\n\n## Step 2: Configuration Change\nApply the patch or configuration change documented in the vendor security bulletin. Verify the fix using the relevant CLI tools.\n\n## Step 3: Validation\nRun the automated regression suite to ensure no service disruption. Document the incident in the GRC platform.`
-                    }
-                })),
-                {
-                    title: 'Deploy "The Governor" PII Filter',
-                    type: 'tech',
-                    tools: ['Maestro-Gov', 'Azure OpenAI'],
-                    est: '2 days',
-                    icon: Shield,
-                    deliverable: {
-                        type: 'Configuration Artifact',
-                        markdown: `# The Governor: PII Filter Configuration\n\n## Overview\nThis module intercepts all LLM prompts and redacts sensitive entities before they leave your VPC.\n\n## Setup Instructions\n1. Pull the Docker container: \`docker pull maestro/governor:latest\`\n2. Set environment variables for Azure OpenAI endpoint.\n3. Configure redaction rules in \`rules.yaml\`:\n   - **SSN**: [REDACTED]\n   - **Credit Card**: [REDACTED]\n   - **Email**: [HASHED]`
-                    }
-                },
-                {
-                    title: 'Establish Cost Baseline',
-                    type: 'ops',
-                    tools: ['Maestro-Friction'],
-                    est: '3 days',
-                    icon: DollarSign,
-                    deliverable: {
-                        type: 'Audit Template',
-                        markdown: `# Friction Cost Analysis Report\n\n## Objective\nQuantify the "Shadow AI" spend and productivity loss due to fragmented tool usage.\n\n## Methodology\n- **API Audit**: Scan network logs for unauthorized 3rd party AI calls.\n- **User Survey**: "What tools do you pay for on your personal card?"\n- **Output**: A consolidated board-ready PDF report highlighting the projected $${frictionCost.toLocaleString()} annual waste.`
-                    }
-                }
-            ]
+            description: priorityArea === 'governance'
+                ? `Critical: Governance gap of ${governanceGap.toFixed(1)} points. Lock down policies first.`
+                : `Critical: Literacy gap of ${literacyGap.toFixed(1)} points. Upskill the team first.`,
+            gapScore: priorityArea === 'governance' ? governanceGap : literacyGap,
+            items: priorityArea === 'governance' ? buildGovernanceItems() : buildLiteracyItems()
         },
         {
-            title: 'Phase 2: Literacy & Culture',
-            color: 'from-blue-400 to-indigo-500',
+            title: `Phase 2: ${priorityArea === 'governance' ? 'Literacy Uplift' : 'Governance Lockdown'}`,
+            color: priorityArea === 'governance' ? 'from-blue-400 to-indigo-500' : 'from-amber-400 to-orange-500',
             duration: 'Weeks 5-8',
-            description: "Shift from Fear to Adoption. Train the team on the tools they are already using.",
-            items: [
-                {
-                    title: 'Launch "Spear" Pilot Program',
-                    type: 'culture',
-                    tools: ['Workshops'],
-                    est: '2 weeks',
-                    icon: Zap,
-                    deliverable: {
-                        type: 'Workshop Deck',
-                        markdown: `# Spear Pilot: From Fear to Power\n\n## Slide 1: The "Why"\nAI isn't coming for your job; a human using AI is. Let's upgrade your toolkit.\n\n## Slide 2: The Rules of Engagement\n- Never put customer data in public ChatGPT.\n- Always verify output.\n- Share your prompts in the "Spec Library".\n\n## Activity\nSplit into groups and solve a real business problem using the approved "Maestro" tools.`
-                    }
-                },
-                {
-                    title: 'AI Ethics & Safety Certification',
-                    type: 'training',
-                    tools: ['Internal LMS'],
-                    est: '1 week',
-                    icon: CheckCircle,
-                    deliverable: {
-                        type: 'Training Module',
-                        markdown: `# AI Safety Certification\n\n**Module 1: Bias & Hallucination**\nUnderstanding how LLMs work and why they lie.\n\n**Module 2: Data Sovereignty**\nWhy your data must stay within our legal jurisdiction.\n\n**Quiz**\n30-question assessment required for "Agent Author" access privileges.`
-                    }
-                },
-                ...(spearScore < 50 ? [{
-                    title: 'Emergency "Fear Gauge" Town Hall',
-                    type: 'critical',
-                    tools: ['Zoom'],
-                    est: '1 day',
-                    icon: Zap,
-                    deliverable: {
-                        type: 'Meeting Script',
-                        markdown: `# Town Hall Script: Addressing AI Anxiety\n\n**Opening:**\n"We've heard the concerns about 'replacement'. Today we are committing to a 'augmentation-first' policy."\n\n**Key Message:**\nNo one gets fired for automation. We reinvest the saved time into innovation.\n\n**Q&A Preparation:**\nPrepare for questions about job security, privacy, and skill rot.`
-                    }
-                }] : [])
-            ]
+            description: priorityArea === 'governance'
+                ? `Secondary: Literacy gap of ${literacyGap.toFixed(1)} points. Train the workforce.`
+                : `Secondary: Governance gap of ${governanceGap.toFixed(1)} points. Establish controls.`,
+            gapScore: priorityArea === 'governance' ? literacyGap : governanceGap,
+            items: priorityArea === 'governance' ? buildLiteracyItems() : buildGovernanceItems()
         },
         {
-            title: 'Phase 3: Sovereign Acceleration',
-            color: 'from-purple-400 to-pink-500',
-            duration: 'Weeks 9-12',
-            description: "Full local deployment. Move off public APIs to private, fine-tuned models.",
+            title: 'Phase 3: Sustained Excellence',
+            color: 'from-emerald-400 to-teal-500',
+            duration: 'Ongoing',
+            description: 'Maintain 4.0 maturity across all scales with continuous monitoring.',
+            gapScore: 0,
             items: [
                 {
-                    title: 'Deploy Local Llama 3 Swarm',
-                    type: 'tech',
-                    tools: ['Ollama', 'Docker'],
-                    est: '2 weeks',
-                    icon: Wrench,
-                    deliverable: {
-                        type: 'Technical Architecture',
-                        markdown: `# Local Swarm Architecture\n\n## Nodes\n- **Inference**: 3x AWS g5.2xlarge instances running Ollama.\n- **Orchestration**: Kubernetes cluster managing the Agent Swarm.\n- **Model Selection**: We will use Llama 3 70B Quantized for general reasoning and CodeLlama for dev tasks.`
-                    }
-                },
-                {
-                    title: 'Fine-tune "The Writer" on Company Data',
-                    type: 'tech',
-                    tools: ['HuggingFace', 'LoRA'],
-                    est: '1 week',
+                    title: 'Quarterly Maturity Re-Assessment',
+                    type: 'ops',
+                    tools: ['Maestro Platform'],
+                    est: 'Quarterly',
                     icon: Target,
+                    scale: 'all',
                     deliverable: {
-                        type: 'Dataset Spec',
-                        markdown: `# Fine-Tuning Specification\n\n**Base Model**: Llama 3 8B\n**Target**: "The Writer" (Marketing Copy Specialist)\n\n**Dataset:**\n- 5,000 internal blog posts.\n- 200 whitepapers.\n- Brand Voice Guidelines.\n\n**Method:**\nQLoRA on a single A100 GPU for 4 hours.`
+                        type: 'Process Doc',
+                        markdown: `# Quarterly Review Process\n\n1. Re-run the Maturity Assessment\n2. Compare scores to previous quarter\n3. Identify regression areas\n4. Update Roadmap accordingly`
                     }
                 }
             ]
         }
-    ];
+    ].filter(p => p.items.length > 0 || p.title.includes('Sustained')); // Only show phases with items
 
     return (
         <div className="h-full flex flex-col bg-zinc-50 dark:bg-zinc-950 overflow-hidden relative">
-            <header className="px-8 py-6 border-b border-zinc-800 bg-zinc-900/50 flex justify-between items-center">
+            <header className="px-8 py-6 border-b border-zinc-800 bg-zinc-900/50 flex justify-between items-center flex-wrap gap-4">
                 <div>
                     <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2 text-white">
-                        <span className="text-emerald-500 font-mono">Phase 3:</span> The Remediation Roadmap
+                        <span className="text-emerald-500 font-mono">Phase 2:</span> Dynamic Remediation Roadmap
                     </h1>
                     <p className="text-zinc-400 text-sm mt-1">
-                        Based on {identifiedRisks.length} risks and a friction cost of ${frictionCost.toLocaleString()}/mo.
+                        Based on: Literacy {maturityScores.literacy.toFixed(1)}/4.0 (Gap: {literacyGap.toFixed(1)}) • Governance {maturityScores.governance.toFixed(1)}/4.0 (Gap: {governanceGap.toFixed(1)}) • {identifiedRisks.length} risks • ${frictionCost.toLocaleString()}/mo friction
                     </p>
                 </div>
-                <button className="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition-colors">
-                    <CheckCircle className="w-4 h-4" /> Approve Logic
-                </button>
+                <div className="flex gap-2">
+                    <div className="px-3 py-1.5 bg-blue-500/10 text-blue-400 text-xs font-bold rounded-lg border border-blue-500/20">
+                        Literacy: {maturityScores.literacy.toFixed(1)}
+                    </div>
+                    <div className="px-3 py-1.5 bg-amber-500/10 text-amber-400 text-xs font-bold rounded-lg border border-amber-500/20">
+                        Governance: {maturityScores.governance.toFixed(1)}
+                    </div>
+                </div>
             </header>
 
             <div className="flex-1 overflow-y-auto p-8">
                 <div className="max-w-5xl mx-auto">
-                    <div className="space-y-8 relative">
-                        {/* Connecting Line */}
-                        <div className="absolute left-8 top-8 bottom-8 w-0.5 bg-zinc-800" />
+                    {/* Check if assessment has been completed */}
+                    {maturityScores.overall === 0 && identifiedRisks.length === 0 ? (
+                        <div className="text-center py-16">
+                            <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center">
+                                <AlertCircle className="w-12 h-12 text-amber-500" />
+                            </div>
+                            <h2 className="text-2xl font-bold text-white mb-3">No Assessment Data</h2>
+                            <p className="text-zinc-400 max-w-md mx-auto mb-8">
+                                Complete the <strong>Maturity Assessment</strong> first to generate a dynamic remediation roadmap based on your actual gaps.
+                            </p>
+                            <button
+                                onClick={() => window.dispatchEvent(new CustomEvent('navigate', { detail: 'assess' }))}
+                                className="px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg transition-all"
+                            >
+                                Go to Assessment →
+                            </button>
 
-                        {phases.map((phase, pIdx) => (
-                            <div key={pIdx} className="relative z-10 pl-24 animate-in fade-in slide-in-from-bottom-4 duration-700" style={{ animationDelay: `${pIdx * 150}ms` }}>
-                                {/* Phase Marker */}
-                                <div className={`absolute left-0 top-0 w-16 h-16 rounded-2xl bg-gradient-to-br ${phase.color} flex items-center justify-center font-bold text-2xl shadow-lg text-white border border-white/10`}>
-                                    {pIdx + 1}
+                            <div className="mt-12 grid grid-cols-2 gap-6 max-w-xl mx-auto text-left">
+                                <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
+                                    <div className="text-xs text-zinc-500 uppercase mb-1">Literacy Gap</div>
+                                    <div className="text-2xl font-bold text-blue-400">?/4.0</div>
+                                    <div className="text-xs text-zinc-500 mt-1">Complete assessment</div>
                                 </div>
-
-                                <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 hover:border-zinc-700 transition-all group">
-                                    <div className="flex justify-between items-start mb-6">
-                                        <div>
-                                            <h3 className={`text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r ${phase.color}`}>
-                                                {phase.title}
-                                            </h3>
-                                            <p className="text-zinc-500 text-sm mt-1">{phase.description}</p>
-                                        </div>
-                                        <span className="text-xs font-mono font-bold text-zinc-600 px-3 py-1 rounded-full bg-zinc-950 border border-zinc-800">
-                                            {phase.duration}
-                                        </span>
-                                    </div>
-
-                                    <div className="space-y-3">
-                                        {phase.items.map((item, i) => (
-                                            <button
-                                                key={i}
-                                                onClick={() => setSelectedItem(item)}
-                                                className="w-full flex items-center justify-between p-3 bg-zinc-950 rounded-lg border border-zinc-800/50 hover:border-zinc-500/50 hover:bg-zinc-900 transition-all group/item cursor-pointer text-left"
-                                            >
-                                                <div className="flex items-center gap-3">
-                                                    <div className={`p-2 rounded-md transition-colors ${item.type === 'tech' ? 'bg-blue-500/10 text-blue-500 group-hover/item:bg-blue-500/20' :
-                                                        item.type === 'governance' ? 'bg-amber-500/10 text-amber-400 group-hover/item:bg-amber-500/20' :
-                                                            item.type === 'critical' ? 'bg-red-500/10 text-red-500 group-hover/item:bg-red-500/20' : 'bg-purple-500/10 text-purple-400 group-hover/item:bg-purple-500/20'
-                                                        }`}>
-                                                        <item.icon className="w-4 h-4" />
-                                                    </div>
-                                                    <div>
-                                                        <span className="font-semibold text-zinc-300 text-sm group-hover/item:text-white transition-colors">{item.title}</span>
-                                                        <div className="text-[10px] text-zinc-500 flex items-center gap-1 mt-0.5">
-                                                            <FileText className="w-3 h-3" />
-                                                            {item.deliverable?.type || "Deliverable"}
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div className="flex items-center gap-4">
-                                                    <div className="flex gap-1.5">
-                                                        {item.tools?.map(tool => (
-                                                            <span key={tool} className="text-[10px] px-2 py-0.5 rounded bg-zinc-900 text-zinc-500 border border-zinc-800 font-mono">
-                                                                {tool}
-                                                            </span>
-                                                        ))}
-                                                    </div>
-                                                    <span className="text-xs font-mono text-zinc-600 hidden sm:block">{item.est}</span>
-                                                    <ChevronRight className="w-4 h-4 text-zinc-700 group-hover/item:text-white transition-colors" />
-                                                </div>
-                                            </button>
-                                        ))}
-                                    </div>
+                                <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
+                                    <div className="text-xs text-zinc-500 uppercase mb-1">Governance Gap</div>
+                                    <div className="text-2xl font-bold text-amber-400">?/4.0</div>
+                                    <div className="text-xs text-zinc-500 mt-1">Complete assessment</div>
                                 </div>
                             </div>
-                        ))}
-                    </div>
+                        </div>
+                    ) : (
+                        <div className="space-y-8 relative">
+                            {/* Connecting Line */}
+                            <div className="absolute left-8 top-8 bottom-8 w-0.5 bg-zinc-800" />
+
+                            {phases.map((phase, pIdx) => (
+                                <div key={pIdx} className="relative z-10 pl-24 animate-in fade-in slide-in-from-bottom-4 duration-700" style={{ animationDelay: `${pIdx * 150}ms` }}>
+                                    {/* Phase Marker */}
+                                    <div className={`absolute left-0 top-0 w-16 h-16 rounded-2xl bg-gradient-to-br ${phase.color} flex items-center justify-center font-bold text-2xl shadow-lg text-white border border-white/10`}>
+                                        {pIdx + 1}
+                                    </div>
+
+                                    <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 hover:border-zinc-700 transition-all group">
+                                        <div className="flex justify-between items-start mb-6">
+                                            <div>
+                                                <h3 className={`text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r ${phase.color}`}>
+                                                    {phase.title}
+                                                </h3>
+                                                <p className="text-zinc-500 text-sm mt-1">{phase.description}</p>
+                                            </div>
+                                            <span className="text-xs font-mono font-bold text-zinc-600 px-3 py-1 rounded-full bg-zinc-950 border border-zinc-800">
+                                                {phase.duration}
+                                            </span>
+                                        </div>
+
+                                        <div className="space-y-3">
+                                            {phase.items.map((item, i) => (
+                                                <button
+                                                    key={i}
+                                                    onClick={() => setSelectedItem(item)}
+                                                    className="w-full flex items-center justify-between p-3 bg-zinc-950 rounded-lg border border-zinc-800/50 hover:border-zinc-500/50 hover:bg-zinc-900 transition-all group/item cursor-pointer text-left"
+                                                >
+                                                    <div className="flex items-center gap-3">
+                                                        <div className={`p-2 rounded-md transition-colors ${item.type === 'tech' ? 'bg-blue-500/10 text-blue-500 group-hover/item:bg-blue-500/20' :
+                                                            item.type === 'governance' ? 'bg-amber-500/10 text-amber-400 group-hover/item:bg-amber-500/20' :
+                                                                item.type === 'critical' ? 'bg-red-500/10 text-red-500 group-hover/item:bg-red-500/20' : 'bg-purple-500/10 text-purple-400 group-hover/item:bg-purple-500/20'
+                                                            }`}>
+                                                            <item.icon className="w-4 h-4" />
+                                                        </div>
+                                                        <div>
+                                                            <span className="font-semibold text-zinc-300 text-sm group-hover/item:text-white transition-colors">{item.title}</span>
+                                                            <div className="text-[10px] text-zinc-500 flex items-center gap-1 mt-0.5">
+                                                                <FileText className="w-3 h-3" />
+                                                                {item.deliverable?.type || "Deliverable"}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex items-center gap-4">
+                                                        <div className="flex gap-1.5">
+                                                            {item.tools?.map(tool => (
+                                                                <span key={tool} className="text-[10px] px-2 py-0.5 rounded bg-zinc-900 text-zinc-500 border border-zinc-800 font-mono">
+                                                                    {tool}
+                                                                </span>
+                                                            ))}
+                                                        </div>
+                                                        <span className="text-xs font-mono text-zinc-600 hidden sm:block">{item.est}</span>
+                                                        <ChevronRight className="w-4 h-4 text-zinc-700 group-hover/item:text-white transition-colors" />
+                                                    </div>
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </div>
 

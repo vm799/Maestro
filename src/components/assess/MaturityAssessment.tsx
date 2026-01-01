@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { ExecutiveReport } from './ExecutiveReport'; // Import the new component
 import { FileText, BookOpen, AlertCircle } from 'lucide-react'; // Assuming these are used and need to be imported
+import { useClient } from '../../context/ClientContext';
 
 const ASSESSMENT_RUBRIC = [
     {
@@ -81,11 +82,31 @@ export function MaturityAssessment() {
     const [answers, setAnswers] = useState<Record<string, number>>({});
     const [showReport, setShowReport] = useState(false);
 
+    // Get the context to save scores globally
+    const { setMaturityScores } = useClient();
+
     // Derived State
     const activeSection = ASSESSMENT_RUBRIC.find(s => s.id === activeTab) || ASSESSMENT_RUBRIC[0];
 
     const handleScore = (questionId: string, score: number) => {
-        setAnswers(prev => ({ ...prev, [questionId]: score }));
+        const newAnswers = { ...answers, [questionId]: score };
+        setAnswers(newAnswers);
+
+        // Calculate and save scores to global context
+        const literacyIds = ['l1', 'l2', 'l3'];
+        const govIds = ['p1', 'p2'];
+
+        const literacyScores = literacyIds.map(id => newAnswers[id] || 0).filter(s => s > 0);
+        const govScores = govIds.map(id => newAnswers[id] || 0).filter(s => s > 0);
+
+        const literacy = literacyScores.length > 0
+            ? Number((literacyScores.reduce((a, b) => a + b, 0) / literacyScores.length).toFixed(1))
+            : 0;
+        const governance = govScores.length > 0
+            ? Number((govScores.reduce((a, b) => a + b, 0) / govScores.length).toFixed(1))
+            : 0;
+
+        setMaturityScores({ literacy, governance });
     };
 
     const calculateTotal = () => {
@@ -93,6 +114,21 @@ export function MaturityAssessment() {
         if (scores.length === 0) return "0.0";
         const total = scores.reduce((a, b) => a + b, 0);
         return (total / scores.length).toFixed(1);
+    };
+
+    // Scale-specific score calculations
+    const getLiteracyScore = () => {
+        const literacyIds = ['l1', 'l2', 'l3'];
+        const literacyScores = literacyIds.map(id => answers[id] || 0).filter(s => s > 0);
+        if (literacyScores.length === 0) return 0;
+        return Number((literacyScores.reduce((a, b) => a + b, 0) / literacyScores.length).toFixed(1));
+    };
+
+    const getGovernanceScore = () => {
+        const govIds = ['p1', 'p2'];
+        const govScores = govIds.map(id => answers[id] || 0).filter(s => s > 0);
+        if (govScores.length === 0) return 0;
+        return Number((govScores.reduce((a, b) => a + b, 0) / govScores.length).toFixed(1));
     };
 
     // Helper to format scores for the report
@@ -209,35 +245,89 @@ export function MaturityAssessment() {
                         ))}
                     </div>
 
-                    {/* Right: Consultant Guidance (The PhD Notes) */}
-                    <div className="w-80 border-l border-border bg-zinc-50/50 dark:bg-zinc-900/50 overflow-y-auto p-6">
-                        <div className="flex items-center gap-2 mb-6 text-primary">
-                            <BookOpen className="w-4 h-4" />
-                            <span className="text-xs font-bold uppercase tracking-widest">Consultant Playbook</span>
+                    {/* Right: LIVE MATURITY SCALES */}
+                    <div className="w-80 border-l border-border bg-zinc-900/80 overflow-y-auto p-6">
+                        <div className="flex items-center gap-2 mb-6">
+                            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                            <span className="text-xs font-bold uppercase tracking-widest text-emerald-400">Live Scores</span>
                         </div>
 
-                        <div className="space-y-6">
-                            {activeSection.questions.map((q, idx) => (
-                                <div key={q.id} className="relative pl-4 border-l-2 border-primary/20">
-                                    <div className="absolute -left-[5px] top-0 w-2.5 h-2.5 rounded-full bg-primary/20" />
-                                    <h4 className="text-xs font-bold text-foreground mb-1">Guidance for Q{idx + 1}</h4>
-                                    <p className="text-xs text-muted-foreground leading-relaxed italic">
-                                        "{q.consultantContext}"
-                                    </p>
-                                    <div className="mt-2 flex items-center gap-1.5 text-[10px] text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 px-2 py-1 rounded w-fit">
-                                        <AlertCircle className="w-3 h-3" />
-                                        <span>Assess evidence, not claims.</span>
-                                    </div>
+                        {/* Overall Score */}
+                        <div className="mb-8 p-4 bg-zinc-950 rounded-xl border border-zinc-800">
+                            <div className="flex justify-between items-baseline mb-2">
+                                <span className="text-sm text-zinc-400">Overall Maturity</span>
+                                <span className="text-3xl font-bold text-white">{calculateTotal()}<span className="text-lg text-zinc-500">/4.0</span></span>
+                            </div>
+                            <div className="h-3 bg-zinc-800 rounded-full overflow-hidden">
+                                <div
+                                    className="h-full bg-gradient-to-r from-amber-500 via-blue-500 to-emerald-500 transition-all duration-500"
+                                    style={{ width: `${(Number(calculateTotal()) / 4) * 100}%` }}
+                                />
+                            </div>
+                        </div>
+
+                        {/* Scale 1: AI Literacy */}
+                        <div className="mb-6">
+                            <div className="flex justify-between items-center mb-2">
+                                <span className="text-xs font-bold uppercase text-blue-400 flex items-center gap-2">
+                                    <BookOpen className="w-3 h-3" /> AI Literacy
+                                </span>
+                                <span className="text-sm font-mono text-white">{getLiteracyScore()}</span>
+                            </div>
+                            <div className="relative h-2 bg-zinc-800 rounded-full overflow-hidden">
+                                <div
+                                    className="absolute h-full bg-blue-500 transition-all duration-500"
+                                    style={{ width: `${(getLiteracyScore() / 4) * 100}%` }}
+                                />
+                                <div className="absolute right-0 top-0 h-full w-0.5 bg-emerald-500" title="Target: 4.0" />
+                            </div>
+                            <div className="flex justify-between mt-1 text-[10px] text-zinc-500">
+                                <span>Ad-Hoc</span>
+                                <span>Optimized</span>
+                            </div>
+                        </div>
+
+                        {/* Scale 2: AI Governance */}
+                        <div className="mb-6">
+                            <div className="flex justify-between items-center mb-2">
+                                <span className="text-xs font-bold uppercase text-amber-400 flex items-center gap-2">
+                                    <AlertCircle className="w-3 h-3" /> AI Governance
+                                </span>
+                                <span className="text-sm font-mono text-white">{getGovernanceScore()}</span>
+                            </div>
+                            <div className="relative h-2 bg-zinc-800 rounded-full overflow-hidden">
+                                <div
+                                    className="absolute h-full bg-amber-500 transition-all duration-500"
+                                    style={{ width: `${(getGovernanceScore() / 4) * 100}%` }}
+                                />
+                                <div className="absolute right-0 top-0 h-full w-0.5 bg-emerald-500" title="Target: 4.0" />
+                            </div>
+                            <div className="flex justify-between mt-1 text-[10px] text-zinc-500">
+                                <span>No Policy</span>
+                                <span>Enforced</span>
+                            </div>
+                        </div>
+
+                        {/* Gap Analysis Summary */}
+                        <div className="mt-8 p-4 bg-red-950/30 rounded-xl border border-red-500/20">
+                            <h4 className="font-bold text-sm mb-3 text-red-400 flex items-center gap-2">
+                                <AlertCircle className="w-4 h-4" /> Gap to Target
+                            </h4>
+                            <div className="space-y-2 text-xs">
+                                <div className="flex justify-between">
+                                    <span className="text-zinc-400">Literacy Gap</span>
+                                    <span className="text-red-400 font-mono">{(4 - getLiteracyScore()).toFixed(1)} pts</span>
                                 </div>
-                            ))}
+                                <div className="flex justify-between">
+                                    <span className="text-zinc-400">Governance Gap</span>
+                                    <span className="text-red-400 font-mono">{(4 - getGovernanceScore()).toFixed(1)} pts</span>
+                                </div>
+                            </div>
                         </div>
 
-                        <div className="mt-8 p-4 bg-primary/5 rounded-xl border border-primary/10">
-                            <h4 className="font-bold text-sm mb-2 text-primary">Expert Reference</h4>
-                            <p className="text-xs text-muted-foreground">
-                                "True maturity isn't tool adoption; it's the shift from deterministic software to probabilistic reasoning."
-                            </p>
-                            <p className="text-xs text-right mt-2 font-medium">- Nate B. Jones</p>
+                        {/* Answered Summary */}
+                        <div className="mt-6 text-center text-xs text-zinc-500">
+                            {Object.keys(answers).length} / {ASSESSMENT_RUBRIC.reduce((acc, s) => acc + s.questions.length, 0)} questions answered
                         </div>
                     </div>
                 </div>
