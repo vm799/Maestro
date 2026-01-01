@@ -1,35 +1,45 @@
-import React, { useState } from 'react';
-import { ASSESSMENT_RUBRIC } from '../../data/assessment_rubric';
-import type { AssessmentSection, Question } from '../../data/assessment_rubric';
-import { ChevronRight, Info, BookOpen, AlertCircle, FileText } from 'lucide-react';
+import { ExecutiveReport } from './ExecutiveReport'; // Import the new component
 
 export function MaturityAssessment() {
     const [activeTab, setActiveTab] = useState<string>("literacy");
     const [answers, setAnswers] = useState<Record<string, number>>({});
+    const [showReport, setShowReport] = useState(false); // State for modal
 
-    const activeSection = ASSESSMENT_RUBRIC.find(s => s.id === activeTab) as AssessmentSection;
+    // ... existing logic ...
 
-    const handleScore = (qId: string, score: number) => {
-        setAnswers(prev => ({ ...prev, [qId]: score }));
-    };
-
-    const calculateTotal = () => {
-        const values = Object.values(answers);
-        if (values.length === 0) return 0;
-        return (values.reduce((a, b) => a + b, 0) / values.length).toFixed(1);
+    // Helper to format scores for the report
+    const getFormattedScores = () => {
+        return ASSESSMENT_RUBRIC.map(section => {
+            const sectionQuestions = section.questions.map(q => q.id);
+            const sectionScores = sectionQuestions.map(id => answers[id] || 0);
+            const avg = sectionScores.reduce((a, b) => a + b, 0) / (sectionScores.length || 1);
+            return { category: section.title.split(":")[0], score: avg };
+        });
     };
 
     return (
-        <div className="h-full flex flex-col bg-zinc-50 dark:bg-zinc-950 overflow-hidden">
+        <div className="h-full flex flex-col bg-zinc-50 dark:bg-zinc-950 overflow-hidden relative">
+            {showReport && (
+                <ExecutiveReport
+                    onClose={() => setShowReport(false)}
+                    scores={getFormattedScores()}
+                />
+            )}
+
             <header className="px-8 py-6 border-b border-zinc-800 bg-zinc-900/50 flex justify-between items-center flex-wrap gap-4">
                 <div>
                     <h1 className="text-2xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-500">Deep-Dive Maturity Audit</h1>
                     <p className="text-zinc-400 text-sm mt-1">PhD-Level Diagnostic • <span className="text-white font-bold">{calculateTotal()} / 4.0 Score</span></p>
                 </div>
-                <button className="bg-primary text-primary-foreground px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 hover:bg-primary/90 transition-all shadow-lg hover:shadow-primary/20">
+                <button
+                    onClick={() => setShowReport(true)}
+                    className="bg-primary text-primary-foreground px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 hover:bg-primary/90 transition-all shadow-lg hover:shadow-primary/20"
+                >
                     <FileText className="w-4 h-4" /> Generate Audit Report
                 </button>
             </header>
+
+            {/* ... rest of the render code ... */}
 
             <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
                 {/* Sidebar: Pillars */}

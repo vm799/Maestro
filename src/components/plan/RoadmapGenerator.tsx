@@ -77,32 +77,44 @@ export function RoadmapGenerator() {
 
                     {/* Timeline */}
                     <div className="relative border-l-2 border-border ml-4 space-y-12 pb-12">
-                        {phases.map((phase, idx) => (
-                            <div key={phase.id} className="relative pl-8">
-                                {/* Dot */}
-                                <div className="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-primary border-4 border-background" />
+                    </header>
 
-                                <div className="bg-card border border-border rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
-                                    <div className="flex justify-between items-start mb-4">
-                                        <div>
-                                            <div className="flex items-center gap-3 mb-1">
-                                                <h3 className="font-bold text-xl">{phase.title}</h3>
-                                                <span className="text-xs font-mono bg-secondary px-2 py-0.5 rounded text-zinc-400">{phase.duration}</span>
-                                            </div>
-                                            <p className="text-sm text-zinc-400">{phase.description}</p>
-                                        </div>
-                                    </div>
+                    <div className="space-y-8 relative">
+                        {/* Connecting Line */}
+                        <div className="absolute left-8 top-8 bottom-8 w-0.5 bg-zinc-800" />
 
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        {recommendedPhases.map((phase, pIdx) => (
+                            <div key={pIdx} className="relative z-10 pl-20">
+                                {/* Phase Marker */}
+                                <div className={`absolute left-0 top-0 w-16 h-16 rounded-2xl bg-gradient-to-br ${phase.color} flex items-center justify-center font-bold text-2xl shadow-lg`}>
+                                    {pIdx + 1}
+                                </div>
+
+                                <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-6 hover:border-zinc-700 transition-all">
+                                    <h3 className={`text-xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r ${phase.color}`}>
+                                        {phase.title}
+                                    </h3>
+
+                                    <div className="space-y-4">
                                         {phase.items.map((item, i) => (
-                                            <div key={i} className="flex items-center gap-3 p-3 bg-secondary/30 rounded-lg border border-transparent hover:border-primary/20 transition-colors">
-                                                <div className={`p-2 rounded-md ${item.type === 'remediation' ? 'bg-red-500/10 text-red-500' :
-                                                    item.type === 'cost' ? 'bg-emerald-500/10 text-emerald-500' :
-                                                        'bg-blue-500/10 text-blue-500'
-                                                    }`}>
-                                                    <item.icon className="w-4 h-4" />
+                                            <div key={i} className="flex items-center justify-between p-4 bg-zinc-950 rounded-lg border border-zinc-800/50 hover:border-zinc-700 group">
+                                                <div className="flex items-center gap-4">
+                                                    <div className={`w-2 h-2 rounded-full ${item.type === 'tech' ? 'bg-blue-500' :
+                                                            item.type === 'governance' ? 'bg-amber-500' : 'bg-purple-500'
+                                                        }`} />
+                                                    <span className="font-semibold text-zinc-200">{item.title}</span>
                                                 </div>
-                                                <span className="text-sm font-medium">{item.text}</span>
+                                                <div className="flex items-center gap-6">
+                                                    <div className="flex gap-2">
+                                                        {item.tools.map(tool => (
+                                                            <span key={tool} className="text-[10px] px-2 py-0.5 rounded bg-zinc-900 text-zinc-500 border border-zinc-800">
+                                                                {tool}
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                    <span className="text-xs font-mono text-zinc-500">{item.est}</span>
+                                                    <ChevronRight className="w-4 h-4 text-zinc-600 group-hover:text-white transition-colors" />
+                                                </div>
                                             </div>
                                         ))}
                                     </div>
