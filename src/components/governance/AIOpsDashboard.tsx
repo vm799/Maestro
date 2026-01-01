@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { useClient } from '../../context/ClientContext';
 import { Shield, Zap, Activity, Bot, AlertTriangle, CheckCircle, BarChart3 } from 'lucide-react';
+import { AgentBlueprint } from './AgentBlueprint';
 
 export function AIOpsDashboard() {
     const { shieldScore, spearScore, identifiedRisks, frictionCost } = useClient();
 
     // Simulate "Live" Metrics
     const [events, setEvents] = useState<string[]>([]);
+    const [selectedAgent, setSelectedAgent] = React.useState<any>(null); // For modal
 
     useEffect(() => {
         const interval = setInterval(() => {
@@ -22,8 +24,33 @@ export function AIOpsDashboard() {
         return () => clearInterval(interval);
     }, []);
 
+    const AgentCard = ({ name, role, status, icon: Icon }: any) => (
+        <div
+            onClick={() => setSelectedAgent({ name, role, status, icon: Icon })}
+            className="flex items-center gap-4 p-4 bg-zinc-900 border border-zinc-800 rounded-lg hover:border-primary/50 cursor-pointer transition-all group hover:bg-zinc-800/80"
+        >
+            <div className={`p-3 rounded-lg ${status === 'active' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-zinc-950 text-zinc-500'}`}>
+                <Icon className="w-5 h-5 group-hover:scale-110 transition-transform" />
+            </div>
+            <div>
+                <h4 className="font-bold text-zinc-200 group-hover:text-white transition-colors">{name}</h4>
+                <p className="text-xs text-zinc-500">{role}</p>
+            </div>
+            <div className="ml-auto flex items-center gap-2">
+                <div className={`w-2 h-2 rounded-full animate-pulse ${status === 'active' ? 'bg-emerald-500' : 'bg-zinc-700'}`} />
+                <span className="text-[10px] font-mono text-zinc-600 uppercase hidden lg:block">{status}</span>
+            </div>
+        </div>
+    );
+
     return (
         <div className="h-full flex flex-col bg-zinc-950 text-white overflow-hidden">
+            {selectedAgent && (
+                <AgentBlueprint
+                    agent={selectedAgent}
+                    onClose={() => setSelectedAgent(null)}
+                />
+            )}
             <header className="px-8 py-6 border-b border-zinc-800 bg-zinc-900/50 flex justify-between items-center">
                 <div>
                     <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
@@ -109,66 +136,30 @@ export function AIOpsDashboard() {
                 </div>
 
                 {/* Center Column: The Agent Fleet Grid */}
-                <div className="lg:col-span-2 space-y-6">
-                    <div className="grid grid-cols-2 gap-4">
-                        <AgentCard name="Audit Scout" role="Discovery" status="idle" icon={Bot} />
-                        <AgentCard name="The Governor" role="Compliance" status="active" icon={Shield} />
-                        <AgentCard name="The Analyst" role="Research" status="active" icon={BarChart3} />
-                        <AgentCard name="The Writer" role="Production" status="idle" icon={Zap} />
-                    </div>
-
-                    {/* Live Event Log */}
-                    <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl overflow-hidden flex flex-col h-[300px]">
-                        <div className="px-4 py-3 border-b border-zinc-800 bg-zinc-900 flex items-center gap-2">
-                            <Activity className="w-4 h-4 text-emerald-500" />
-                            <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-300">Live Event Stream</h3>
-                        </div>
-                        <div className="flex-1 p-4 font-mono text-xs space-y-3 overflow-y-auto">
-                            {events.map((evt, i) => (
-                                <div key={i} className="flex gap-3 animate-in fade-in slide-in-from-left-2 duration-300">
-                                    <span className="text-zinc-600">[{new Date().toLocaleTimeString()}]</span>
-                                    <span className="text-zinc-300">{evt}</span>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
+                {/* Center Column: The Agent Fleet Grid */}
+                <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Fixed Agent List for Demo */}
+                    <AgentCard name="Audit Scout" role="Stack Discovery & Risk Analysis" status="active" icon={Zap} />
+                    <AgentCard name="The Governor" role="Real-time PII & Compliance Filter" status="active" icon={Shield} />
+                    <AgentCard name="The Writer" role="Content Generation (PhD)" status="idle" icon={Bot} />
+                    <AgentCard name="The Analyst" role="ROI & Friction Cost Calc" status="active" icon={Activity} />
                 </div>
+            </div>
 
+            {/* Event Stream Footer */}
+            <div className="h-32 bg-zinc-900 border-t border-zinc-800 p-6">
+                <h3 className="text-xs font-bold uppercase text-zinc-500 mb-2 flex items-center gap-2">
+                    <Activity className="w-3 h-3" /> Live Event Stream
+                </h3>
+                <div className="space-y-1 font-mono text-sm text-zinc-400">
+                    {events.map((e, i) => (
+                        <div key={i} className="flex items-center gap-2 animate-in slide-in-from-bottom-1 fade-in duration-300">
+                            <span className="text-zinc-600">[{new Date().toLocaleTimeString()}]</span>
+                            {e}
+                        </div>
+                    ))}
+                </div>
             </div>
         </div>
     );
-}
-
-function MetricCard({ title, value, unit, trend, trendVal }: any) {
-    return (
-        <div className="bg-zinc-900 border border-zinc-800 p-6 rounded-xl">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-500 mb-2">{title}</h3>
-            <div className="flex items-baseline gap-1">
-                <span className="text-3xl font-bold text-white font-mono">{value}</span>
-                <span className="text-sm text-zinc-400">{unit}</span>
-            </div>
-            <div className={`text-xs mt-3 flex items-center gap-1 ${trend === 'up' ? 'text-emerald-400' : 'text-red-400'}`}>
-                {trend === 'up' ? '↑' : '↓'} {trendVal} vs last week
-            </div>
-        </div>
-    )
-}
-function AgentCard({ name, role, status, icon: Icon }: any) {
-    return (
-        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 flex items-center gap-4 hover:bg-zinc-800/50 transition-colors">
-            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${status === 'active' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-zinc-800 text-zinc-500'}`}>
-                <Icon className="w-5 h-5" />
-            </div>
-            <div className="flex-1">
-                <h4 className="font-bold text-sm">{name}</h4>
-                <p className="text-xs text-zinc-500">{role}</p>
-            </div>
-            <div>
-                <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded ${status === 'active' ? 'bg-emerald-500/20 text-emerald-500' : 'bg-zinc-700/50 text-zinc-400'
-                    }`}>
-                    {status}
-                </span>
-            </div>
-        </div>
-    )
 }

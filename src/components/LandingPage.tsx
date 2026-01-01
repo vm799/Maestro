@@ -1,37 +1,33 @@
+```javascript
 import React from 'react';
-import { ArrowRight, ShieldCheck, Zap, Globe, LayoutGrid, CheckCircle } from 'lucide-react';
+import { ArrowRight, Shield, Zap, Layout, ChevronRight, CheckCircle } from 'lucide-react';
+import { Entropy } from './Entropy';
 
-export function LandingPage({ onLogin }: { onLogin: () => void }) {
+interface LandingPageProps {
+    onLogin: () => void;
+}
+
+export function LandingPage({ onLogin }: LandingPageProps) {
     return (
-        <div className="min-h-screen bg-zinc-950 text-white selection:bg-primary selection:text-black font-sans">
-            {/* Nav */}
-            <nav className="fixed top-0 w-full z-50 border-b border-white/10 bg-zinc-950/80 backdrop-blur-md">
+        <div className="min-h-screen bg-zinc-950 text-white font-sans selection:bg-purple-500/30">
+            {/* Header */}
+            <nav className="fixed top-0 w-full z-50 border-b border-white/5 bg-zinc-950/80 backdrop-blur-md">
                 <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 bg-white/10 rounded-lg flex items-center justify-center">
-                            <LayoutGrid className="w-5 h-5 text-white" />
+                    <div className="flex items-center gap-2 font-bold text-xl tracking-tighter">
+                        <div className="w-8 h-8 bg-gradient-to-br from-white to-zinc-500 rounded-lg flex items-center justify-center">
+                            <span className="text-black font-serif italic">S</span>
                         </div>
-                        <span className="font-bold tracking-tight text-lg">Maestro OS</span>
+                        Sovereign Architect
                     </div>
-                    <div className="flex items-center gap-6">
-                        <button className="text-sm text-zinc-400 hover:text-white transition-colors">Framework</button>
-                        <button className="text-sm text-zinc-400 hover:text-white transition-colors">Case Studies</button>
-                        <button
-                            onClick={onLogin}
-                            className="bg-white text-black px-5 py-2 rounded-full text-sm font-bold hover:bg-zinc-200 transition-all flex items-center gap-2"
-                        >
-                            Enter Console <ArrowRight className="w-4 h-4" />
-                        </button>
-                    </div>
+                    <button 
+                        onClick={onLogin}
+                        className="text-sm font-medium text-zinc-400 hover:text-white transition-colors"
+                    >
+                        Sign In
+                    </button>
                 </div>
             </nav>
 
-            {/* Hero */}
-            <section className="relative pt-32 pb-24 px-6 overflow-hidden">
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] bg-primary/20 blur-[120px] rounded-full pointer-events-none opacity-50" />
-
-                <div className="max-w-4xl mx-auto text-center relative z-10">
-                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-medium text-zinc-300 mb-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
                         <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
                         v2.4 System Online
                     </div>
@@ -59,6 +55,27 @@ export function LandingPage({ onLogin }: { onLogin: () => void }) {
                     </div>
                 </div>
             </section>
+
+            {/* Right: Entropy Animation */}
+            <div className="relative flex flex-col justify-center items-center h-[600px]">
+                {/* Gradient Glow */}
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-purple-500/20 rounded-full blur-[100px] opacity-50" />
+                
+                {/* The Component */}
+                <div className="relative z-10 animate-in zoom-in duration-1000 delay-300">
+                    <Entropy size={500} />
+                </div>
+                
+                {/* Caption */}
+                <div className="relative z-10 mt-6 text-center animate-in fade-in duration-1000 delay-700">
+                    <p className="text-sm tracking-widest uppercase text-zinc-500 font-mono">
+                        Order and Chaos Dance
+                    </p>
+                    <p className="text-xs text-zinc-600 font-serif italic mt-1">
+                        Digital poetry in motion. by <span className="text-purple-400">KainXu</span>
+                    </p>
+                </div>
+            </div>
 
             {/* Grid Features */}
             <section className="py-24 border-t border-white/5 relative bg-zinc-900/30">
