@@ -66,7 +66,10 @@ export function LandingPage({ onLogin }: LandingPageProps) {
                                 </span>
                                 <div className="absolute inset-0 bg-gradient-to-r from-purple-100 to-blue-100 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                             </button>
-                            <button className="px-8 py-4 bg-zinc-900 border border-zinc-800 text-zinc-300 rounded-lg font-bold text-lg hover:bg-zinc-800 hover:text-white hover:border-zinc-600 transition-all duration-300 hover:scale-105 active:scale-95">
+                            <button
+                                onClick={onLogin}
+                                className="px-8 py-4 bg-zinc-900 border border-zinc-800 text-zinc-300 rounded-lg font-bold text-lg hover:bg-zinc-800 hover:text-white hover:border-zinc-600 transition-all duration-300 hover:scale-105 active:scale-95"
+                            >
                                 View Demo
                             </button>
                         </div>
@@ -92,9 +95,12 @@ export function LandingPage({ onLogin }: LandingPageProps) {
                         </div>
 
                         {/* Caption */}
-                        <div className="relative z-10 mt-2 text-center w-[800px] animate-in fade-in duration-1000 delay-700 pointer-events-none">
-                            <p className="text-sm tracking-widest uppercase text-zinc-600 opacity-60 font-mono">
+                        <div className="relative z-10 mt-4 text-center w-[800px] animate-in fade-in duration-1000 delay-700 pointer-events-none">
+                            <p className="text-xs tracking-[0.2em] uppercase text-zinc-500 font-mono opacity-80">
                                 Order and Chaos Dance
+                            </p>
+                            <p className="text-[10px] text-zinc-600 font-serif italic mt-1 font-light">
+                                Digital poetry in motion. by <span className="text-zinc-400">KainXu</span>
                             </p>
                         </div>
                     </div>

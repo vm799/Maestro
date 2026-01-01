@@ -1,4 +1,6 @@
+import React, { useState } from 'react';
 import { ExecutiveReport } from './ExecutiveReport'; // Import the new component
+import { FileText, BookOpen, AlertCircle } from 'lucide-react'; // Assuming these are used and need to be imported
 
 export function MaturityAssessment() {
     const [activeTab, setActiveTab] = useState<string>("literacy");
