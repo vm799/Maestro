@@ -11,6 +11,7 @@ export interface ToolNode {
     risky: boolean;
     x?: number;
     y?: number;
+    icon?: any; // Storing the icon component reference or name
 }
 
 export interface Risk {
@@ -21,10 +22,18 @@ export interface Risk {
     detectedBy: 'StackMap' | 'AuditScout';
 }
 
+export interface CostBasis {
+    avgHourlyRate: number; // e.g. $65/hr
+    employeeCount: number; // e.g. 50
+    remediationTimePerIncident: number; // hours, e.g. 2
+    incidentsPerMonth: number; // Replaces magic number '4'
+}
+
 export interface ClientState {
     // Identity
     companyName: string;
     industry: string;
+    costBasis: CostBasis;
 
     // The Stack (Day 1 Input)
     stack: ToolNode[];
@@ -39,9 +48,11 @@ export interface ClientState {
 
     // Actions
     addTool: (tool: ToolNode) => void;
+    updateToolPosition: (id: string, x: number, y: number) => void;
     removeTool: (toolId: string) => void;
     reportRisk: (risk: Risk) => void;
     updateScores: (shieldDelta: number, spearDelta: number) => void;
+    updateCostBasis: (basis: Partial<CostBasis>) => void;
 }
 
 // --- Context ---
@@ -54,8 +65,17 @@ export function ClientProvider({ children }: { children: ReactNode }) {
     const [shieldScore, setShieldScore] = useState(100); // Start perfect, drop as we find problems
     const [spearScore, setSpearScore] = useState(50);    // Start neutral
 
-    // Derived metrics
-    const frictionCost = identifiedRisks.length * 1500; // $1.5k per risk roughly
+    // Default Assumptions (Validatable)
+    const [costBasis, setCostBasis] = useState<CostBasis>({
+        avgHourlyRate: 75, // Market rate default
+        employeeCount: 10,
+        remediationTimePerIncident: 4, // Hours wasted fixing shadow IT issues
+        incidentsPerMonth: 4 // Default: 1 incident per week
+    });
+
+    // Dynamic Friction Cost: Risks * Incidents * Cost per Incident
+    // Formula: Risks * IncidentsPerMonth * (RemediationTime * HourlyRate)
+    const frictionCost = identifiedRisks.length * costBasis.incidentsPerMonth * (costBasis.remediationTimePerIncident * costBasis.avgHourlyRate);
 
     const addTool = (tool: ToolNode) => {
         setStack(prev => [...prev, tool]);
@@ -70,6 +90,10 @@ export function ClientProvider({ children }: { children: ReactNode }) {
             // Immediate penalty for Shadow AI
             setShieldScore(s => Math.max(0, s - 10));
         }
+    };
+
+    const updateToolPosition = (id: string, x: number, y: number) => {
+        setStack(prev => prev.map(t => t.id === id ? { ...t, x, y } : t));
     };
 
     const removeTool = (toolId: string) => {
@@ -94,15 +118,18 @@ export function ClientProvider({ children }: { children: ReactNode }) {
         <ClientContext.Provider value={{
             companyName: "Acme Corp", // Placeholder
             industry: "Technology",
+            costBasis,
             stack,
             shieldScore,
             spearScore,
             frictionCost,
             identifiedRisks,
             addTool,
+            updateToolPosition,
             removeTool,
             reportRisk,
-            updateScores
+            updateScores,
+            updateCostBasis: (basis) => setCostBasis(prev => ({ ...prev, ...basis }))
         }}>
             {children}
         </ClientContext.Provider>

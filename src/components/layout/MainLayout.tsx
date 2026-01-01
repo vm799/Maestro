@@ -16,6 +16,13 @@ export function MainLayout() {
     const [activeView, setActiveView] = useState('clients');
     const [sidebarOpen, setSidebarOpen] = useState(true);
 
+    // Listen for cross-component navigation requests (e.g., StackMap -> AuditScout)
+    React.useEffect(() => {
+        const handleNavigation = (e: any) => setActiveView(e.detail);
+        window.addEventListener('navigate', handleNavigation);
+        return () => window.removeEventListener('navigate', handleNavigation);
+    }, []);
+
     // Proposed Views:
     // 1. Clients (List of active engagements) -> Clicking one goes to Dashboard
     // 2. Onboarding (New Client)
