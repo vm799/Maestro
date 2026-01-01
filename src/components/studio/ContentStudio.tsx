@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { useClient } from '../../context/ClientContext';
-import { PenTool, Linkedin, FileText, Mic, Copy, RefreshCw, Check, Sparkles } from 'lucide-react';
+import { PenTool, Linkedin, FileText, Mic, Copy, RefreshCw, Check, Sparkles, Database, Download } from 'lucide-react';
 
 type ContentType = 'linkedin' | 'blog' | 'email';
 
@@ -63,12 +63,13 @@ export function ContentStudio() {
 
     return (
         <div className="h-full flex flex-col bg-zinc-50 dark:bg-zinc-950 overflow-hidden">
-            <header className="px-8 py-6 border-b border-border bg-card flex justify-between items-center">
+            <header className="px-8 py-6 border-b border-zinc-800 bg-zinc-900/50 flex justify-between items-center">
                 <div>
                     <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
-                        <span className="text-primary">Phase 3:</span> Content Studio
+                        <span className="text-purple-500 font-mono">Phase 3:</span>
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">Content Studio</span>
                     </h1>
-                    <p className="text-muted-foreground text-sm">Turn your Audit Insights into C-Suite Influence.</p>
+                    <p className="text-zinc-400 text-sm mt-1">Turn your Audit Insights into C-Suite Influence.</p>
                 </div>
                 <div className="flex items-center gap-2">
                     <span className="px-3 py-1 bg-secondary rounded-full text-xs font-mono text-muted-foreground">
@@ -107,18 +108,25 @@ export function ContentStudio() {
                         </div>
                     </div>
 
-                    <div className="p-4 bg-muted/50 rounded-xl border border-border">
-                        <h4 className="text-xs font-bold mb-2 flex items-center gap-2">
-                            <Sparkles className="w-3 h-3 text-amber-500" />
-                            Context Injected
-                        </h4>
-                        <ul className="text-[10px] space-y-1 text-muted-foreground">
-                            <li className="flex justify-between"><span>Risks:</span> <span className="font-mono">{identifiedRisks.length}</span></li>
-                            <li className="flex justify-between"><span>Cost:</span> <span className="font-mono">${frictionCost.toLocaleString()}</span></li>
-                            <li className="flex justify-between"><span>Shield:</span> <span className="font-mono">{shieldScore}/100</span></li>
-                        </ul>
+                    <div className="bg-zinc-900/50 border border-zinc-800 rounded-lg p-4 mb-6">
+                        <h3 className="text-xs font-bold uppercase text-zinc-500 mb-3 flex items-center gap-2">
+                            <Database className="w-3 h-3" /> Context Injected
+                        </h3>
+                        <div className="space-y-2 text-xs">
+                            <div className="flex justify-between">
+                                <span className="text-zinc-400">Governance Score:</span>
+                                <span className="text-emerald-400 font-mono">{shieldScore}%</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span className="text-zinc-400">Est. Friction Cost:</span>
+                                <span className="text-red-400 font-mono">${frictionCost.toLocaleString()}</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span className="text-zinc-400">Risk Factors:</span>
+                                <span className="text-zinc-200">{identifiedRisks.length} incidents</span>
+                            </div>
+                        </div>
                     </div>
-
                     <button
                         onClick={() => generateContent(activeTab)}
                         disabled={isGenerating}

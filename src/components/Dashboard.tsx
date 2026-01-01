@@ -32,15 +32,15 @@ export function Dashboard() {
     };
 
     return (
-        <div className="h-full w-full bg-background flex flex-col p-8 overflow-y-auto">
-            <header className="flex justify-between items-end mb-10 border-b border-border pb-6">
+        <div className="h-full w-full bg-zinc-950 flex flex-col p-8 overflow-y-auto">
+            <header className="flex justify-between items-end mb-10 border-b border-zinc-800 pb-6 flex-wrap gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight text-foreground">Client Portfolio</h1>
-                    <p className="text-muted-foreground mt-2 text-sm">Select an active engagement or initialize a new consulting project.</p>
+                    <h1 className="text-4xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white via-zinc-200 to-zinc-500">Client Portfolio</h1>
+                    <p className="text-zinc-400 mt-2 text-sm font-medium">Select an active engagement or initialize a new consulting project.</p>
                 </div>
                 <button
                     onClick={() => setIsWizardOpen(true)}
-                    className="bg-primary text-primary-foreground px-5 py-2.5 rounded-lg text-sm font-bold flex items-center gap-2 hover:opacity-90 transition-opacity"
+                    className="bg-primary text-black px-4 py-2 rounded-lg font-bold flex items-center gap-2 hover:opacity-90 transition-opacity"
                 >
                     <Plus className="w-4 h-4" /> New Engagement
                 </button>
@@ -52,7 +52,7 @@ export function Dashboard() {
                     <div
                         key={client.id}
                         onClick={() => loadClient(client)}
-                        className="group bg-card border border-border hover:border-primary/50 rounded-xl p-6 cursor-pointer transition-all hover:shadow-lg relative overflow-hidden"
+                        className="group relative bg-zinc-900 border border-zinc-800 rounded-xl p-6 hover:border-primary/50 transition-all cursor-pointer shadow-lg hover:shadow-primary/10"
                     >
                         <div className="flex justify-between items-start mb-6">
                             <div className="w-12 h-12 rounded-lg bg-secondary flex items-center justify-center text-foreground group-hover:scale-110 transition-transform">
@@ -63,15 +63,15 @@ export function Dashboard() {
                             </span>
                         </div>
 
-                        <h3 className="text-xl font-bold mb-1 text-foreground group-hover:text-primary transition-colors">{client.name}</h3>
-                        <p className="text-sm text-muted-foreground mb-6">{client.industry}</p>
+                        <h3 className="text-xl font-bold mb-1 text-zinc-100 group-hover:text-primary transition-colors">{client.name}</h3>
+                        <p className="text-sm text-zinc-400 mb-6">{client.industry}</p>
 
-                        <div className="space-y-3 border-t border-border pt-4">
+                        <div className="space-y-3 border-t border-zinc-800 pt-4">
                             <div className="flex justify-between text-xs">
-                                <span className="text-muted-foreground">Current Phase</span>
-                                <span className="font-semibold text-foreground">{client.phase}</span>
+                                <span className="text-zinc-500">Current Phase</span>
+                                <span className="font-semibold text-zinc-200">{client.phase}</span>
                             </div>
-                            <div className="w-full bg-secondary h-1.5 rounded-full overflow-hidden">
+                            <div className="w-full bg-zinc-800 h-1.5 rounded-full overflow-hidden">
                                 <div className="bg-primary h-full w-1/4" /> {/* Progress Bar */}
                             </div>
                         </div>
@@ -109,10 +109,10 @@ export function Dashboard() {
 
                         <form onSubmit={handleCreateClient} className="space-y-6">
                             <div className="space-y-2">
-                                <label className="text-xs font-bold uppercase text-muted-foreground">Client Name</label>
+                                <label className="text-xs font-bold uppercase text-zinc-500">Client Name</label>
                                 <input
                                     autoFocus
-                                    className="w-full bg-secondary border border-border rounded-lg p-3 text-sm focus:ring-2 focus:ring-primary outline-none"
+                                    className="w-full bg-zinc-900 border border-zinc-700 rounded-lg p-3 text-sm text-white focus:ring-2 focus:ring-primary outline-none placeholder:text-zinc-600"
                                     placeholder="e.g. Acme Corp"
                                     value={newClient.name}
                                     onChange={e => setNewClient({ ...newClient, name: e.target.value })}
@@ -121,18 +121,18 @@ export function Dashboard() {
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                    <label className="text-xs font-bold uppercase text-muted-foreground">Industry</label>
+                                    <label className="text-xs font-bold uppercase text-zinc-500">Industry</label>
                                     <input
-                                        className="w-full bg-secondary border border-border rounded-lg p-3 text-sm focus:ring-2 focus:ring-primary outline-none"
+                                        className="w-full bg-zinc-900 border border-zinc-700 rounded-lg p-3 text-sm text-white focus:ring-2 focus:ring-primary outline-none placeholder:text-zinc-600"
                                         placeholder="e.g. Healthcare"
                                         value={newClient.industry}
                                         onChange={e => setNewClient({ ...newClient, industry: e.target.value })}
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-xs font-bold uppercase text-muted-foreground">Region</label>
+                                    <label className="text-xs font-bold uppercase text-zinc-500">Region</label>
                                     <select
-                                        className="w-full bg-secondary border border-border rounded-lg p-3 text-sm focus:ring-2 focus:ring-primary outline-none"
+                                        className="w-full bg-zinc-900 border border-zinc-700 rounded-lg p-3 text-sm text-white focus:ring-2 focus:ring-primary outline-none"
                                         value={newClient.region}
                                         onChange={e => setNewClient({ ...newClient, region: e.target.value })}
                                     >

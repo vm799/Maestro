@@ -21,19 +21,19 @@ export function MaturityAssessment() {
 
     return (
         <div className="h-full flex flex-col bg-zinc-50 dark:bg-zinc-950 overflow-hidden">
-            <header className="px-8 py-6 border-b border-border bg-card flex justify-between items-center">
+            <header className="px-8 py-6 border-b border-zinc-800 bg-zinc-900/50 flex justify-between items-center flex-wrap gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold tracking-tight">Deep-Dive Maturity Audit</h1>
-                    <p className="text-muted-foreground text-sm">PhD-Level Diagnostic • {calculateTotal()} / 4.0 Score</p>
+                    <h1 className="text-2xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-500">Deep-Dive Maturity Audit</h1>
+                    <p className="text-zinc-400 text-sm mt-1">PhD-Level Diagnostic • <span className="text-white font-bold">{calculateTotal()} / 4.0 Score</span></p>
                 </div>
-                <button className="bg-primary text-primary-foreground px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
+                <button className="bg-primary text-primary-foreground px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 hover:bg-primary/90 transition-all shadow-lg hover:shadow-primary/20">
                     <FileText className="w-4 h-4" /> Generate Audit Report
                 </button>
             </header>
 
-            <div className="flex-1 flex overflow-hidden">
+            <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
                 {/* Sidebar: Pillars */}
-                <div className="w-64 border-r border-border bg-card overflow-y-auto">
+                <div className="w-full lg:w-64 border-b lg:border-b-0 lg:border-r border-border bg-card overflow-y-auto flex-shrink-0">
                     <div className="p-4 space-y-2">
                         {ASSESSMENT_RUBRIC.map(section => (
                             <button
@@ -55,7 +55,7 @@ export function MaturityAssessment() {
                 </div>
 
                 {/* Main: Analysis Canvas */}
-                <div className="flex-1 flex overflow-hidden">
+                <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
                     {/* Center: Questions */}
                     <div className="flex-1 overflow-y-auto p-8 space-y-8">
                         <div className="mb-6">
@@ -94,7 +94,7 @@ export function MaturityAssessment() {
                                                         </span>
                                                         {answers[q.id] === score && <div className="w-2 h-2 rounded-full bg-primary" />}
                                                     </div>
-                                                    <p className="text-muted-foreground text-xs leading-relaxed">
+                                                    <p className="text-zinc-400 text-xs leading-relaxed">
                                                         {score === 1 ? q.scoringGuide.nonExistent :
                                                             score === 2 ? q.scoringGuide.emerging :
                                                                 score === 3 ? q.scoringGuide.systematic :

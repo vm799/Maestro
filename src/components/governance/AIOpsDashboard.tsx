@@ -27,9 +27,10 @@ export function AIOpsDashboard() {
             <header className="px-8 py-6 border-b border-zinc-800 bg-zinc-900/50 flex justify-between items-center">
                 <div>
                     <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
-                        <span className="text-emerald-500">Phase 4:</span> AIOps Control
+                        <span className="text-emerald-500 font-mono">Phase 4:</span>
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-400">AIOps Control</span>
                     </h1>
-                    <p className="text-zinc-400 text-sm">Live Orchestration & Governance</p>
+                    <p className="text-zinc-400 text-sm mt-1">Live Orchestration & Governance</p>
                 </div>
                 <div className="flex items-center gap-4">
                     <div className="flex items-center gap-2 px-3 py-1 bg-emerald-500/10 rounded-full border border-emerald-500/20">
@@ -138,6 +139,20 @@ export function AIOpsDashboard() {
     );
 }
 
+function MetricCard({ title, value, unit, trend, trendVal }: any) {
+    return (
+        <div className="bg-zinc-900 border border-zinc-800 p-6 rounded-xl">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-500 mb-2">{title}</h3>
+            <div className="flex items-baseline gap-1">
+                <span className="text-3xl font-bold text-white font-mono">{value}</span>
+                <span className="text-sm text-zinc-400">{unit}</span>
+            </div>
+            <div className={`text-xs mt-3 flex items-center gap-1 ${trend === 'up' ? 'text-emerald-400' : 'text-red-400'}`}>
+                {trend === 'up' ? '↑' : '↓'} {trendVal} vs last week
+            </div>
+        </div>
+    )
+}
 function AgentCard({ name, role, status, icon: Icon }: any) {
     return (
         <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 flex items-center gap-4 hover:bg-zinc-800/50 transition-colors">

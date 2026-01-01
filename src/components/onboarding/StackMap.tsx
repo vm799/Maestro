@@ -110,12 +110,13 @@ export function StackMap() {
             onMouseUp={handleMouseUp}
             onMouseLeave={handleMouseUp}
         >
-            <header className="px-8 py-6 border-b border-zinc-800 flex justify-between items-center bg-zinc-900/50">
+            <header className="px-8 py-6 border-b border-zinc-800 flex justify-between items-center bg-zinc-900/50 flex-wrap gap-4">
                 <div>
                     <h1 className="text-2xl font-bold tracking-tight text-white flex items-center gap-2">
-                        <span className="text-primary">Phase 1:</span> Stack Discovery
+                        <span className="text-blue-500 font-mono">Phase 1:</span>
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">Stack Discovery</span>
                     </h1>
-                    <p className="text-zinc-400 text-sm">Map your Enterprise Ecosystem. Drag to connect integrations.</p>
+                    <p className="text-zinc-400 text-sm mt-1">Map your Enterprise Ecosystem. Drag to connect integrations.</p>
                 </div>
                 <div className="flex items-center gap-4">
                     <div className="text-right">
@@ -128,9 +129,9 @@ export function StackMap() {
                     </div>
                     <button
                         onClick={handleAnalyze}
-                        className="bg-white text-black hover:bg-zinc-200 px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition-all hover:scale-105 active:scale-95"
+                        className="bg-white text-black hover:bg-zinc-200 px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition-all hover:scale-105 active:scale-95 shadow-[0_0_15px_rgba(255,255,255,0.2)]"
                     >
-                        Analyze Risks <ArrowRight className="w-4 h-4" />
+                        Generate Insights <ArrowRight className="w-4 h-4" />
                     </button>
                 </div>
             </header>
@@ -146,29 +147,66 @@ export function StackMap() {
                                 onClick={() => handleAddTool(tool)}
                                 className="w-full flex items-center gap-3 p-3 rounded-lg border border-zinc-700 bg-zinc-800 hover:border-zinc-500 transition-all group"
                             >
-                                <div className={`p-2 rounded-md ${tool.category === 'hosting' ? "bg-blue-900/30 text-blue-400" : "bg-zinc-700 text-zinc-300"}`}>
-                                    <tool.icon className="w-4 h-4" />
+                                <div className="w-10 h-10 rounded-lg bg-zinc-800 flex items-center justify-center border border-zinc-700 group-hover:border-primary/50 transition-colors">
+                                    <tool.icon className="w-5 h-5 text-zinc-300 group-hover:text-primary" />
                                 </div>
-                                <span className="text-sm font-medium text-zinc-300 group-hover:text-white flex-1 text-left">{tool.name}</span>
+                                <div className="text-left">
+                                    <div className="text-sm font-bold text-zinc-200">{tool.name}</div>
+                                    <div className="text-xs text-zinc-500 uppercase tracking-wider">{tool.category}</div>
+                                </div>
+                                {tool.risky && (
+                                    <AlertTriangle className="w-4 h-4 text-amber-500 ml-auto" />
+                                )}
                             </button>
                         ))}
                     </div>
 
-                    <div className="mt-4 pt-4 border-t border-zinc-800">
+                    <div className="mt-8 p-4 bg-zinc-900/50 border border-dashed border-zinc-700 rounded-lg text-center">
+                        <p className="text-xs text-zinc-400 mb-2">Can't find a tool?</p>
                         <button
                             onClick={() => setIsCustomModalOpen(true)}
-                            className="w-full py-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 hover:border-zinc-500 text-zinc-300 rounded-lg text-xs font-bold flex items-center justify-center gap-2 transition-all"
+                            className="text-xs text-primary font-bold hover:underline hover:text-white transition-colors"
                         >
-                            <Code className="w-3 h-3" /> Add Custom / Internal Tool
+                            + Add Custom / Legacy Tool
                         </button>
                     </div>
                 </div>
 
-                {/* The Canvas */}
+                {/* Main Canvas */}
                 <div
                     ref={canvasRef}
-                    className="flex-1 relative bg-[radial-gradient(#27272a_1px,transparent_1px)] [background-size:16px_16px] overflow-hidden cursor-crosshair"
+                    className="flex-1 overflow-hidden relative bg-zinc-950 flex flex-col"
                 >
+                    {/* Ambient Glows */}
+                    <div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] bg-purple-600/10 rounded-full blur-[120px] pointer-events-none" />
+                    <div className="absolute bottom-[-20%] right-[-10%] w-[600px] h-[600px] bg-emerald-600/10 rounded-full blur-[120px] pointer-events-none" />
+                    <div className="absolute top-[30%] left-[40%] translate-x-[-50%] w-[400px] h-[400px] bg-blue-600/5 rounded-full blur-[100px] pointer-events-none" />
+
+                    <div className="absolute inset-0 bg-[radial-gradient(#27272a_1px,transparent_1px)] [background-size:16px_16px] opacity-20" />
+
+                    <div className="relative z-10 p-6 flex justify-between items-center pointer-events-none">
+                        <div className="pointer-events-auto">
+                            <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-white to-zinc-500 mb-2">Stack Discovery</h2>
+                            <p className="text-zinc-400 max-w-xl text-sm leading-relaxed">
+                                Drag detected tools onto the canvas to map data flows.
+                                Identify <span className="text-red-400 font-bold">"Shadow AI"</span> by looking for unencrypted API endpoints.
+                            </p>
+                        </div>
+                        <div className="pointer-events-auto flex gap-3">
+                            <div className="bg-zinc-900/80 backdrop-blur border border-zinc-800 px-4 py-2 rounded-lg flex items-center gap-3">
+                                <span className="text-xs font-bold text-zinc-400 uppercase">Risks Detected</span>
+                                <span className="text-red-500 font-mono font-bold text-lg">{stack.filter(n => n.risky).length}</span>
+                            </div>
+                            <button
+                                onClick={handleAnalyze}
+                                disabled={stack.length === 0}
+                                className="bg-white text-black px-6 py-2 rounded-lg font-bold hover:bg-zinc-200 transition-colors shadow-[0_0_15px_rgba(255,255,255,0.2)] disabled:opacity-50 disabled:shadow-none"
+                            >
+                                Analyze Risks &rarr;
+                            </button>
+                        </div>
+                    </div>
+
                     {stack.length === 0 && (
                         <div className="absolute inset-0 flex items-center justify-center text-zinc-600 pointer-events-none">
                             <div className="text-center">

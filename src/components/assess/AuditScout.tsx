@@ -205,12 +205,12 @@ export function AuditScout() {
             <div className="flex-1 flex flex-col max-w-3xl mx-auto bg-card border border-border rounded-xl shadow-lg overflow-hidden">
                 <div className="p-4 border-b border-border bg-muted/30 flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                        <div className="w-10 h-10 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-500 border border-amber-500/20">
                             <Bot className="w-6 h-6" />
                         </div>
                         <div>
-                            <h3 className="font-bold">The Audit Scout</h3>
-                            <p className="text-xs text-muted-foreground">Orchestration Integrity Check</p>
+                            <h3 className="font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-200 to-orange-400">The Audit Scout</h3>
+                            <p className="text-xs text-zinc-400">Orchestration Integrity Check</p>
                         </div>
                     </div>
                     <div className="flex items-center gap-2">
@@ -254,12 +254,12 @@ export function AuditScout() {
                             value={inputText}
                             onChange={e => setInputText(e.target.value)}
                             placeholder={step === 'calibration' ? "Enter a number..." : "Type your answer... be honest."}
-                            className="flex-1 bg-background border border-input rounded-full px-4 py-3 text-sm focus:ring-2 focus:ring-primary outline-none"
+                            className="flex-1 bg-zinc-900 border border-zinc-700 rounded-full px-4 py-3 text-sm text-white focus:ring-2 focus:ring-primary outline-none placeholder:text-zinc-600"
                         />
                         <button
                             type="submit"
                             disabled={!inputText.trim() || isTyping}
-                            className="p-3 bg-primary text-primary-foreground rounded-full hover:bg-primary/90 disabled:opacity-50 transition-all"
+                            className="p-3 bg-primary text-primary-foreground rounded-full hover:bg-primary/90 disabled:opacity-50 transition-all border border-white/10"
                         >
                             <Send className="w-4 h-4 ml-0.5" />
                         </button>
@@ -279,38 +279,38 @@ export function AuditScout() {
 
                 {/* Cost Analysis Card */}
                 <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
-                    <h4 className="font-bold text-sm mb-4 flex items-center justify-between">
+                    <h4 className="font-bold text-sm mb-4 flex items-center justify-between text-zinc-100">
                         <span className="flex items-center gap-2"><HelpCircle className="w-4 h-4 text-primary" /> Cost Analysis</span>
                     </h4>
 
                     {/* The "Proven" Formula */}
                     <div className="space-y-3 text-xs">
-                        <div className="p-3 bg-muted/50 rounded-lg space-y-2 border border-border">
-                            <div className="flex justify-between items-center text-muted-foreground">
+                        <div className="p-3 bg-zinc-900/50 rounded-lg space-y-2 border border-zinc-800">
+                            <div className="flex justify-between items-center text-zinc-400">
                                 <span>Risks Found:</span>
-                                <span className="font-mono font-bold text-foreground">{identifiedRisks.length}</span>
+                                <span className="font-mono font-bold text-zinc-100">{identifiedRisks.length}</span>
                             </div>
-                            <div className="flex justify-between items-center text-muted-foreground">
+                            <div className="flex justify-between items-center text-zinc-400">
                                 <span>Avg. Hourly Rate:</span>
-                                <span className="font-mono font-bold text-foreground">${costBasis.avgHourlyRate}</span>
+                                <span className="font-mono font-bold text-zinc-100">${costBasis.avgHourlyRate}</span>
                             </div>
-                            <div className="flex justify-between items-center text-muted-foreground">
+                            <div className="flex justify-between items-center text-zinc-400">
                                 <span>Fix Time (Hrs):</span>
-                                <span className="font-mono font-bold text-foreground">{costBasis.remediationTimePerIncident}h</span>
+                                <span className="font-mono font-bold text-zinc-100">{costBasis.remediationTimePerIncident}h</span>
                             </div>
-                            <div className="border-t border-border my-2" />
-                            <div className="flex justify-between items-center text-muted-foreground">
+                            <div className="border-t border-zinc-800 my-2" />
+                            <div className="flex justify-between items-center text-zinc-400">
                                 <span>Incidents / Month:</span>
-                                <span className="font-mono font-bold text-foreground">{costBasis.incidentsPerMonth}</span>
+                                <span className="font-mono font-bold text-zinc-100">{costBasis.incidentsPerMonth}</span>
                             </div>
                         </div>
 
                         <div className="pt-2">
                             <div className="flex justify-between items-end">
-                                <span className="font-bold text-muted-foreground">Total Friction:</span>
-                                <span className="font-mono font-bold text-red-600 dark:text-red-400 text-xl">${frictionCost.toLocaleString()}/mo</span>
+                                <span className="font-bold text-zinc-400">Total Friction:</span>
+                                <span className="font-mono font-bold text-red-400 text-xl">${frictionCost.toLocaleString()}/mo</span>
                             </div>
-                            <p className="text-[10px] mt-2 text-muted-foreground border-l-2 border-red-500/20 pl-2">
+                            <p className="text-[10px] mt-2 text-zinc-500 border-l-2 border-red-500/20 pl-2">
                                 <b>Formula:</b> {identifiedRisks.length} Risks × {costBasis.incidentsPerMonth} Incidents × ({costBasis.remediationTimePerIncident}h × ${costBasis.avgHourlyRate}/hr)
                             </p>
                         </div>

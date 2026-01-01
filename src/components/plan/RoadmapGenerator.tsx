@@ -87,9 +87,9 @@ export function RoadmapGenerator() {
                                         <div>
                                             <div className="flex items-center gap-3 mb-1">
                                                 <h3 className="font-bold text-xl">{phase.title}</h3>
-                                                <span className="text-xs font-mono bg-secondary px-2 py-0.5 rounded text-muted-foreground">{phase.duration}</span>
+                                                <span className="text-xs font-mono bg-secondary px-2 py-0.5 rounded text-zinc-400">{phase.duration}</span>
                                             </div>
-                                            <p className="text-sm text-muted-foreground">{phase.description}</p>
+                                            <p className="text-sm text-zinc-400">{phase.description}</p>
                                         </div>
                                     </div>
 
@@ -97,8 +97,8 @@ export function RoadmapGenerator() {
                                         {phase.items.map((item, i) => (
                                             <div key={i} className="flex items-center gap-3 p-3 bg-secondary/30 rounded-lg border border-transparent hover:border-primary/20 transition-colors">
                                                 <div className={`p-2 rounded-md ${item.type === 'remediation' ? 'bg-red-500/10 text-red-500' :
-                                                        item.type === 'cost' ? 'bg-emerald-500/10 text-emerald-500' :
-                                                            'bg-blue-500/10 text-blue-500'
+                                                    item.type === 'cost' ? 'bg-emerald-500/10 text-emerald-500' :
+                                                        'bg-blue-500/10 text-blue-500'
                                                     }`}>
                                                     <item.icon className="w-4 h-4" />
                                                 </div>
