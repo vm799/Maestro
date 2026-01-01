@@ -1,8 +1,7 @@
-
 import React, { useState } from 'react';
-import { ShieldCheck, Lock, Activity, Eye, FileCheck, X, AlertTriangle, CheckCircle, Info } from 'lucide-react';
+import { ShieldCheck, Lock, Activity, Eye, FileCheck, X, AlertTriangle, CheckCircle, Info, Cpu, Database } from 'lucide-react';
 import { cn } from '../lib/utils';
-import { useClient } from '../../context/ClientContext';
+import { useClient } from '../context/ClientContext';
 
 export function GovernanceHUD() {
     const { shieldScore } = useClient();
@@ -63,6 +62,28 @@ export function GovernanceHUD() {
             description: "Watches the 'thought process' of the agent for loops, hallucinations, or drift.",
             whyItMatters: "Agents can get stuck or confidentially wrong. We analyze the chain-of-thought before the final action is taken.",
             maestroCheck: "Hallucination Detection & Sentiment Analysis."
+        },
+        {
+            id: 'l2',
+            name: "Layer 2: Model Grid",
+            status: "Optimized",
+            icon: Database,
+            color: "text-orange-500",
+            title: "Inference & Model Safety",
+            description: "Manages the specific LLM being used (GPT-4, Claude, Llama 3) and switches based on cost/risk profile.",
+            whyItMatters: "Using GPT-4 for simple classification is a waste of money. Using Llama 7B for medical advice is a liability. We route prompts to the 'Right Model for the Right Job'.",
+            maestroCheck: "Dynamic Model Routing & Context Window Management."
+        },
+        {
+            id: 'l1',
+            name: "Layer 1: Compute",
+            status: "Secure",
+            icon: Cpu,
+            color: "text-red-500",
+            title: "Physical Infrastructure",
+            description: "The metallic reality. Where is the GPU? Which region is the data stored in? Is it sovereign?",
+            whyItMatters: "Data Sovereignty. If your government requires data to stay in the EU, you cannot use a US-based inference cluster. We pin compute to specific geographies.",
+            maestroCheck: "Region-Locking & Private VPC Deployment."
         },
     ];
 

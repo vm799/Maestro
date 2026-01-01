@@ -33,7 +33,7 @@ export function MainLayout() {
     };
 
     return (
-        <div className="flex h-screen w-screen bg-background text-foreground overflow-hidden">
+        <div className="flex h-screen w-full bg-background text-foreground overflow-hidden">
             {/* Global Sidebar */}
             <div className={`${sidebarOpen ? "w-64" : "w-16"} transition-all duration-300 bg-zinc-900 text-zinc-300 flex flex-col border-r border-zinc-800`}>
                 <div className="p-4 flex items-center justify-between">
@@ -105,10 +105,12 @@ function NavItem({ icon: Icon, label, active, collapsed, onClick }: any) {
     return (
         <button
             onClick={onClick}
-            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${active ? "bg-primary text-white shadow-lg shadow-primary/20" : "hover:bg-zinc-800 hover:text-white"
+            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all border border-transparent ${active
+                    ? "bg-zinc-800 text-white border-zinc-700 shadow-sm"
+                    : "text-zinc-400 hover:text-white hover:bg-zinc-800/50"
                 } ${collapsed ? "justify-center" : ""}`}
         >
-            <Icon className="w-5 h-5 shrink-0" />
+            <Icon className={`w-5 h-5 shrink-0 ${active ? "text-primary" : "text-zinc-500 group-hover:text-white"}`} />
             {!collapsed && <span className="text-sm font-medium whitespace-nowrap">{label}</span>}
             {active && !collapsed && <ChevronRight className="w-4 h-4 ml-auto opacity-50" />}
         </button>

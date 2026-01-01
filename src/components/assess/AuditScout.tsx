@@ -226,8 +226,8 @@ export function AuditScout() {
                     {messages.map(msg => (
                         <div key={msg.id} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
                             <div className={`max-w-[80%] rounded-2xl px-5 py-3 ${msg.sender === 'user'
-                                ? 'bg-primary text-primary-foreground rounded-tr-none'
-                                : 'bg-secondary text-secondary-foreground rounded-tl-none'
+                                ? 'bg-primary text-primary-foreground rounded-tr-none font-medium'
+                                : 'bg-zinc-800 text-zinc-100 border border-zinc-700 rounded-tl-none shadow-sm'
                                 }`}>
                                 <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.text}</p>
                             </div>
