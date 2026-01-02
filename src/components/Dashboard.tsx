@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Plus, Search, Filter, Briefcase, ArrowRight, UserCircle, Calendar, X, Building2, Globe } from 'lucide-react';
+import { useState } from 'react';
+import { Plus, ArrowRight, X, Building2 } from 'lucide-react';
 
 export function Dashboard() {
     // State for the "New Engagement" Wizard
@@ -11,7 +11,7 @@ export function Dashboard() {
         { id: 1, name: "Northwind Traders", industry: "Logistics", phase: "Discovery", status: "Active" },
     ]);
 
-    const handleCreateClient = (e: React.FormEvent) => {
+    const handleCreateClient = (e: any) => {
         e.preventDefault();
         const client = {
             id: Date.now(),
@@ -25,7 +25,7 @@ export function Dashboard() {
         setNewClient({ name: '', industry: '', region: 'NA' });
     };
 
-    const loadClient = (client: any) => {
+    const loadClient = (_client: any) => {
         // In a real app, this would load context. 
         // For now, we simulate "Opening" the file by navigating to Phase 1.
         window.dispatchEvent(new CustomEvent('navigate', { detail: 'stackmap' }));

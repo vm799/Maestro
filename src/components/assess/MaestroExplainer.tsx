@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import {
-    Shield, ChevronLeft, AlertTriangle, Layers, Info, Target, Zap,
-    Lock, Eye, Activity, Box, Database, Cpu, Globe, ArrowRight,
+    Shield, ChevronLeft, AlertTriangle, Layers, Target, Zap,
+    Lock, Eye, Activity, Box, Database, Cpu, Globe,
     BarChart3, ExternalLink
 } from 'lucide-react';
 import { useClient, type ToolNode, type Mitigation } from '../../context/ClientContext';
@@ -258,8 +258,8 @@ export function MaestroExplainer() {
                             key={tab.id}
                             onClick={() => setActiveView(tab.id as any)}
                             className={`px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition-all ${activeView === tab.id
-                                    ? "bg-emerald-600 text-white shadow-lg"
-                                    : "text-zinc-500 hover:text-zinc-300"
+                                ? "bg-emerald-600 text-white shadow-lg"
+                                : "text-zinc-500 hover:text-zinc-300"
                                 }`}
                         >
                             <tab.icon className="w-4 h-4" />
@@ -272,8 +272,8 @@ export function MaestroExplainer() {
                     onClick={handleRunScan}
                     disabled={isScanning}
                     className={`px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2 ${isScanning
-                            ? "bg-zinc-800 text-zinc-500 cursor-not-allowed"
-                            : "bg-emerald-600/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-600 hover:text-white"
+                        ? "bg-zinc-800 text-zinc-500 cursor-not-allowed"
+                        : "bg-emerald-600/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-600 hover:text-white"
                         }`}
                 >
                     {isScanning ? (
@@ -387,8 +387,8 @@ function TheoryView({ selectedLayer, setSelectedLayerId }: any) {
                         }}
                     >
                         <div className={`absolute inset-0 rounded-2xl border-2 transition-all duration-300 flex items-center px-10 ${selectedLayer?.id === layer.id
-                                ? "bg-zinc-800 border-emerald-500 shadow-[0_0_50px_rgba(16,185,129,0.3)]"
-                                : "bg-zinc-900/80 border-zinc-700 bg-opacity-90 group-hover:border-zinc-500"
+                            ? "bg-zinc-800 border-emerald-500 shadow-[0_0_50px_rgba(16,185,129,0.3)]"
+                            : "bg-zinc-900/80 border-zinc-700 bg-opacity-90 group-hover:border-zinc-500"
                             }`}>
                             <div className={`p-4 rounded-xl bg-zinc-950 border border-zinc-800 mr-8`}>
                                 <layer.icon className={`w-6 h-6 ${selectedLayer?.id === layer.id ? "text-emerald-400" : "text-zinc-500"}`} />
@@ -431,8 +431,8 @@ function AuditView({ toolsByLayer, connections, vulnerabilities }: any) {
                 {steps.map(step => (
                     <div key={step.id} className="flex items-center gap-3">
                         <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold border ${step.status === 'complete' ? 'bg-emerald-600 border-emerald-500 text-white' :
-                                step.status === 'current' ? 'bg-blue-600 border-blue-500 text-white animate-pulse' :
-                                    'bg-zinc-800 border-zinc-700 text-zinc-500'
+                            step.status === 'current' ? 'bg-blue-600 border-blue-500 text-white animate-pulse' :
+                                'bg-zinc-800 border-zinc-700 text-zinc-500'
                             }`}>
                             {step.status === 'complete' ? <CheckCircle className="w-3 h-3" /> : step.id}
                         </div>
@@ -601,8 +601,8 @@ function PatternView({ selectedPattern }: any) {
             <div className="grid grid-cols-2 gap-6">
                 {AGENTIC_PATTERNS.map(pattern => (
                     <div key={pattern.name} className={`p-8 bg-zinc-900 border rounded-3xl transition-all flex flex-col ${selectedPattern === pattern.name.split(' ')[0] || (selectedPattern === 'Multi-Agent' && pattern.name.includes('Multi'))
-                            ? "border-emerald-500 bg-emerald-950/5 ring-1 ring-emerald-500/20 shadow-[0_0_30px_rgba(16,185,129,0.1)]"
-                            : "border-zinc-800"
+                        ? "border-emerald-500 bg-emerald-950/5 ring-1 ring-emerald-500/20 shadow-[0_0_30px_rgba(16,185,129,0.1)]"
+                        : "border-zinc-800"
                         }`}>
                         <div className="flex justify-between items-start mb-4">
                             <h3 className="text-xl font-bold text-white">{pattern.name}</h3>

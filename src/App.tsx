@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { ClientProvider } from './context/ClientContext';
 import { MainLayout } from './components/layout/MainLayout';
 import { LandingPage } from './components/LandingPage';

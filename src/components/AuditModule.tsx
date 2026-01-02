@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Search, ShieldAlert, CheckCircle, FileText, ArrowRight, Server, Database, Globe } from 'lucide-react';
+import { useState } from 'react';
+import { ShieldAlert, CheckCircle, FileText, ArrowRight, Server, Globe } from 'lucide-react';
 import { cn } from '../lib/utils';
 
 export function AuditModule() {
