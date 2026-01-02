@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useClient } from '../../context/ClientContext';
-import { Target, Shield, CheckCircle, ChevronRight, X, FileText, Download, BookOpen, AlertCircle, Zap } from 'lucide-react';
+import { Shield, CheckCircle, ChevronRight, X, FileText, Download, BookOpen, AlertCircle, Zap } from 'lucide-react';
 
 export function RoadmapGenerator() {
     const { identifiedRisks, maturityScores, maestroAudit, stack } = useClient();
