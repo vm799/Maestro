@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Send, Bot, Shield, Zap, CheckCircle, Settings, HelpCircle } from 'lucide-react';
 import { useClient } from '../../context/ClientContext'; // Import Context
 
@@ -53,7 +53,7 @@ const AUDIT_QUESTIONS = [
 ];
 
 export function AuditScout() {
-    const { stack, identifiedRisks, frictionCost, costBasis, updateCostBasis, shieldScore, spearScore, updateScores } = useClient();
+    const { identifiedRisks, frictionCost, costBasis, updateCostBasis, shieldScore, spearScore, updateScores } = useClient();
 
     const [messages, setMessages] = useState<Message[]>([]);
     const [inputText, setInputText] = useState('');

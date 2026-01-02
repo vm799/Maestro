@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { ShieldCheck, Lock, Activity, Eye, FileCheck, X, AlertTriangle, CheckCircle, Info, Cpu, Database } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useClient } from '../context/ClientContext';

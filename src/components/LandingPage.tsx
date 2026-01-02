@@ -1,5 +1,4 @@
-import React from 'react';
-import { ArrowRight, Shield, Zap, Layout, ChevronRight, CheckCircle, ShieldCheck, Globe } from 'lucide-react';
+import { ArrowRight, Zap, CheckCircle, ShieldCheck, Globe } from 'lucide-react';
 import { Entropy } from './Entropy';
 
 interface LandingPageProps {

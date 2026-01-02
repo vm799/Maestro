@@ -1,5 +1,4 @@
-import React from 'react';
-import { Folder, FileText, ChevronRight, Plus, ShieldAlert } from 'lucide-react';
+import { Folder, FileText, ChevronRight, Plus } from 'lucide-react';
 
 interface ProjectExplorerProps {
     activeProject: string | null;

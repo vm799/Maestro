@@ -1,5 +1,4 @@
-import React from 'react';
-import { Bot, FileCode, Play, CheckCircle, Loader2 } from 'lucide-react';
+import { Bot, FileCode, CheckCircle, Loader2 } from 'lucide-react';
 import { cn } from '../lib/utils';
 
 interface LiveCanvasProps {
