@@ -1,10 +1,10 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import {
     Shield, ChevronLeft, AlertTriangle, Layers, Info, Target, Zap,
     Lock, Eye, Activity, Box, Database, Cpu, Globe, ArrowRight,
-    CheckCircle, ExternalLink, Filter, BarChart3, Search, Play, FileText
+    BarChart3, ExternalLink
 } from 'lucide-react';
-import { useClient, type ToolNode, type Risk, type Mitigation } from '../../context/ClientContext';
+import { useClient, type ToolNode, type Mitigation } from '../../context/ClientContext';
 
 // --- Types & Data ---
 
@@ -197,9 +197,14 @@ const MITIGATION_STRATEGIES: Mitigation[] = [
 // --- Main Components ---
 
 export function MaestroExplainer() {
-    const { stack, connections } = useClient();
+    const { stack, connections, runMaestroAudit, maestroAudit } = useClient();
     const [activeView, setActiveView] = useState<'theory' | 'audit' | 'mitigation' | 'patterns'>('theory');
     const [selectedLayerId, setSelectedLayerId] = useState<number | null>(7);
+    const [isScanning, setIsScanning] = useState(false);
+
+    useEffect(() => {
+        runMaestroAudit();
+    }, [stack.length, connections.length]);
 
     const selectedLayer = useMemo(() =>
         MAESTRO_LAYERS.find(l => l.id === selectedLayerId),
@@ -212,6 +217,15 @@ export function MaestroExplainer() {
         });
         return mapping;
     }, [stack]);
+
+    const handleRunScan = () => {
+        setIsScanning(true);
+        setTimeout(() => {
+            runMaestroAudit();
+            setIsScanning(false);
+            setActiveView('audit');
+        }, 1500);
+    };
 
     return (
         <div className="h-full flex flex-col bg-zinc-950 text-white overflow-hidden select-none">
@@ -255,10 +269,23 @@ export function MaestroExplainer() {
                 </div>
 
                 <button
-                    onClick={() => window.dispatchEvent(new CustomEvent('navigate', { detail: 'assess' }))}
-                    className="bg-emerald-600/10 border border-emerald-500/20 text-emerald-400 px-4 py-2 rounded-lg text-xs font-bold hover:bg-emerald-600 transition-all flex items-center gap-2"
+                    onClick={handleRunScan}
+                    disabled={isScanning}
+                    className={`px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2 ${isScanning
+                            ? "bg-zinc-800 text-zinc-500 cursor-not-allowed"
+                            : "bg-emerald-600/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-600 hover:text-white"
+                        }`}
                 >
-                    Final Recommendation <ArrowRight className="w-4 h-4" />
+                    {isScanning ? (
+                        <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+                            Scanning...
+                        </div>
+                    ) : (
+                        <>
+                            <Search className="w-4 h-4" /> Run Deep Scan
+                        </>
+                    )}
                 </button>
             </header>
 
@@ -266,17 +293,30 @@ export function MaestroExplainer() {
                 {/* Main Content Area */}
                 <div className="flex-1 overflow-y-auto bg-zinc-950 p-10">
                     {activeView === 'theory' && <TheoryView selectedLayer={selectedLayer} setSelectedLayerId={setSelectedLayerId} />}
-                    {activeView === 'audit' && <AuditView toolsByLayer={toolsByLayer} connections={connections} />}
-                    {activeView === 'mitigation' && <MitigationView toolsByLayer={toolsByLayer} />}
-                    {activeView === 'patterns' && <PatternView />}
+                    {activeView === 'audit' && (
+                        <AuditView
+                            toolsByLayer={toolsByLayer}
+                            connections={connections}
+                            vulnerabilities={maestroAudit.vulnerabilities}
+                        />
+                    )}
+                    {activeView === 'mitigation' && (
+                        <MitigationView
+                            toolsByLayer={toolsByLayer}
+                            proposedMitigations={maestroAudit.mitigations}
+                        />
+                    )}
+                    {activeView === 'patterns' && (
+                        <PatternView selectedPattern={maestroAudit.selectedPattern} />
+                    )}
                 </div>
 
-                {/* Vertical Info Panel (Conditional based on view) */}
-                {selectedLayer && activeView === 'theory' && (
+                {/* Vertical Info Panel (Theory View Only) */}
+                {activeView === 'theory' && selectedLayer && (
                     <div className="w-[450px] border-l border-zinc-800 bg-zinc-900/30 overflow-y-auto animate-in slide-in-from-right-8 duration-300">
                         <div className="p-8">
                             <div className="flex items-center gap-3 mb-6">
-                                <div className={`p-4 rounded-2xl bg-zinc-800 border-2 border-emerald-500/50 shadow-[0_0_20px_rgba(16,185,129,0.2)]`}>
+                                <div className="p-4 rounded-2xl bg-zinc-800 border-2 border-emerald-500/50 shadow-[0_0_20px_rgba(16,185,129,0.2)]">
                                     <selectedLayer.icon className="w-8 h-8 text-emerald-400" />
                                 </div>
                                 <div>
@@ -363,7 +403,7 @@ function TheoryView({ selectedLayer, setSelectedLayerId }: any) {
                                     <div className="text-lg font-bold text-white">{layer.threats.length} Identified</div>
                                 </div>
                                 <div className="w-10 h-10 rounded-full border border-zinc-700 flex items-center justify-center">
-                                    <ChevronRight className="w-5 h-5" />
+                                    <ChevronLeft className="w-5 h-5 rotate-180" />
                                 </div>
                             </div>
                         </div>
@@ -374,13 +414,39 @@ function TheoryView({ selectedLayer, setSelectedLayerId }: any) {
     );
 }
 
-function AuditView({ toolsByLayer, connections }: any) {
+function AuditView({ toolsByLayer, connections, vulnerabilities }: any) {
+    const steps = [
+        { id: 1, label: "System Decomposition", status: "complete" },
+        { id: 2, label: "Layer Threat Modeling", status: "complete" },
+        { id: 3, label: "Cross-Layer ID", status: vulnerabilities?.length > 0 ? "complete" : "current" },
+        { id: 4, label: "Risk Assessment", status: vulnerabilities?.length > 0 ? "current" : "pending" },
+        { id: 5, label: "Mitigation Planning", status: "pending" },
+        { id: 6, label: "Continuous Monitoring", status: "pending" }
+    ];
+
     return (
         <div className="max-w-6xl">
+            {/* Step Tracker */}
+            <div className="mb-12 flex items-center gap-4 bg-zinc-900/50 p-4 rounded-2xl border border-zinc-800 flex-wrap">
+                {steps.map(step => (
+                    <div key={step.id} className="flex items-center gap-3">
+                        <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold border ${step.status === 'complete' ? 'bg-emerald-600 border-emerald-500 text-white' :
+                                step.status === 'current' ? 'bg-blue-600 border-blue-500 text-white animate-pulse' :
+                                    'bg-zinc-800 border-zinc-700 text-zinc-500'
+                            }`}>
+                            {step.status === 'complete' ? <CheckCircle className="w-3 h-3" /> : step.id}
+                        </div>
+                        <span className={`text-[10px] font-bold uppercase tracking-widest ${step.status === 'pending' ? 'text-zinc-600' : 'text-zinc-300'
+                            }`}>{step.label}</span>
+                        {step.id < 6 && <div className="w-8 h-px bg-zinc-800 hidden sm:block" />}
+                    </div>
+                ))}
+            </div>
+
             <div className="mb-12 flex justify-between items-end">
                 <div>
                     <h2 className="text-4xl font-bold mb-2">Ecosystem Correlation Audit</h2>
-                    <p className="text-zinc-500">Projecting your specific tech stack onto the MAESTRO layers.</p>
+                    <p className="text-zinc-500 text-sm">Mapping detected assets to MAESTRO threats and identifying cross-layer causality.</p>
                 </div>
                 <div className="bg-zinc-900 border border-zinc-800 p-4 rounded-2xl flex gap-8">
                     <div className="text-center">
@@ -392,10 +458,8 @@ function AuditView({ toolsByLayer, connections }: any) {
                         <div className="text-2xl font-bold text-blue-400">{connections.length}</div>
                     </div>
                     <div className="text-center">
-                        <div className="text-[10px] font-bold text-zinc-500 uppercase mb-1">Gaps Detected</div>
-                        <div className="text-2xl font-bold text-red-400">
-                            {MAESTRO_LAYERS.filter(l => toolsByLayer[l.id].length === 0).length}
-                        </div>
+                        <div className="text-[10px] font-bold text-zinc-500 uppercase mb-1">Critical Vulnerabilities</div>
+                        <div className="text-2xl font-bold text-red-500">{vulnerabilities?.length || 0}</div>
                     </div>
                 </div>
             </div>
@@ -403,12 +467,15 @@ function AuditView({ toolsByLayer, connections }: any) {
             <div className="grid grid-cols-1 gap-4">
                 {MAESTRO_LAYERS.map(layer => {
                     const tools = toolsByLayer[layer.id];
+                    const layerRisks = vulnerabilities?.filter((v: any) => v.layer === layer.id) || [];
+
                     return (
-                        <div key={layer.id} className="p-6 bg-zinc-900/40 border border-zinc-800 rounded-2xl flex gap-10 items-center group hover:bg-zinc-900/60 transition-all">
+                        <div key={layer.id} className={`p-6 bg-zinc-900/40 border rounded-2xl flex gap-10 items-center transition-all ${layerRisks.length > 0 ? "border-red-500/30 bg-red-950/5" : "border-zinc-800"
+                            }`}>
                             <div className="w-48 shrink-0">
                                 <div className="text-[10px] font-mono font-bold text-zinc-500">LAYER 0{layer.id}</div>
                                 <h3 className="text-lg font-bold flex items-center gap-2">
-                                    <layer.icon className="w-4 h-4 text-zinc-600" />
+                                    <layer.icon className={`w-4 h-4 ${layerRisks.length > 0 ? 'text-red-400' : 'text-zinc-600'}`} />
                                     {layer.name.split(': ')[1]}
                                 </h3>
                             </div>
@@ -416,27 +483,23 @@ function AuditView({ toolsByLayer, connections }: any) {
                             <div className="flex-1 flex gap-3 flex-wrap">
                                 {tools.length > 0 ? (
                                     tools.map((t: any) => (
-                                        <div key={t.id} className="px-4 py-2 bg-zinc-950 border border-zinc-700/50 rounded-xl flex items-center gap-3 animate-in fade-in zoom-in duration-300">
-                                            <div className="w-6 h-6 rounded bg-zinc-900 flex items-center justify-center">
-                                                {t.icon && <t.icon className="w-3.5 h-3.5 text-zinc-400" />}
-                                            </div>
-                                            <span className="text-sm font-bold">{t.name}</span>
-                                            {t.risky && <AlertTriangle className="w-3 h-3 text-red-500 animate-pulse" />}
+                                        <div key={t.id} className="px-4 py-2 bg-zinc-950 border border-zinc-700/50 rounded-xl flex items-center gap-3">
+                                            <span className="text-sm font-bold text-zinc-300">{t.name}</span>
                                         </div>
                                     ))
                                 ) : (
-                                    <div className="text-xs text-zinc-700 italic flex items-center gap-2">
-                                        <Info className="w-3 h-3" /> No assets detected in this architectural layer.
-                                    </div>
+                                    <div className="text-xs text-zinc-700 italic">No assets detected.</div>
                                 )}
                             </div>
 
-                            {tools.length === 0 && (
-                                <div className="text-right">
-                                    <div className="text-[10px] font-bold text-amber-500/50 uppercase mb-1">Vulnerability</div>
-                                    <div className="text-xs font-bold text-amber-500">Unmanaged Layer</div>
-                                </div>
-                            )}
+                            <div className="flex-1">
+                                {layerRisks.map((risk: any) => (
+                                    <div key={risk.id} className="flex items-start gap-2 text-xs text-red-400 animate-in slide-in-from-left-2">
+                                        <AlertTriangle className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+                                        <span>{risk.description}</span>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     );
                 })}
@@ -445,18 +508,26 @@ function AuditView({ toolsByLayer, connections }: any) {
     );
 }
 
-function MitigationView({ toolsByLayer }: any) {
+function MitigationView({ toolsByLayer, proposedMitigations }: any) {
+    const allMitigations = useMemo(() => {
+        const merged = [...MITIGATION_STRATEGIES];
+        proposedMitigations?.forEach((pm: any) => {
+            if (!merged.find(m => m.id === pm.id)) merged.push(pm);
+        });
+        return merged;
+    }, [proposedMitigations]);
+
     return (
         <div className="max-w-4xl">
             <div className="mb-12">
-                <h2 className="text-4xl font-bold mb-4">Strategic Mitigation Strategies</h2>
-                <p className="text-zinc-500">PhD-level controls prioritized by your tech stack's risk profile.</p>
+                <h2 className="text-4xl font-bold mb-4 text-white">Proposed Strategic Mitigations</h2>
+                <p className="text-zinc-500">PhD-level controls verified against industry benchmarks (NIST/ISO).</p>
             </div>
 
             <div className="space-y-6">
-                {MITIGATION_STRATEGIES.map(strat => {
+                {allMitigations.map(strat => {
                     const affectedLayers = MAESTRO_LAYERS.filter(l => strat.layerRelevance.includes(l.id));
-                    const toolsProtected = strat.layerRelevance.reduce((acc, lId) => acc + toolsByLayer[lId].length, 0);
+                    const toolsProtected = strat.layerRelevance.reduce((acc, lId) => acc + (toolsByLayer[lId]?.length || 0), 0);
 
                     return (
                         <div key={strat.id} className="p-8 bg-zinc-900 border border-zinc-800 rounded-3xl relative overflow-hidden group">
@@ -475,8 +546,8 @@ function MitigationView({ toolsByLayer }: any) {
                                     <p className="text-zinc-400 leading-relaxed max-w-xl">{strat.description}</p>
                                 </div>
                                 <div className="text-right">
-                                    <div className="text-[10px] font-bold text-zinc-500 uppercase mb-1">Relevance Score</div>
-                                    <div className="text-3xl font-black text-white">{toolsProtected > 2 ? 'CORE' : toolsProtected > 0 ? 'HIGH' : 'GLOBAL'}</div>
+                                    <div className="text-[10px] font-bold text-zinc-500 uppercase mb-1">Impact Radius</div>
+                                    <div className="text-3xl font-black text-white">{toolsProtected >= 1 ? 'RELEVANT' : 'ADVISORY'}</div>
                                 </div>
                             </div>
 
@@ -495,7 +566,7 @@ function MitigationView({ toolsByLayer }: any) {
                                 </div>
                                 <div className="bg-emerald-950/20 p-4 rounded-2xl border border-emerald-500/20">
                                     <div className="text-[10px] font-bold text-emerald-500 uppercase mb-2 flex items-center gap-2">
-                                        <ExternalLink className="w-3 h-3" /> Audit Evidence
+                                        <ExternalLink className="w-3 h-3" /> PhD Evidence Rationale
                                     </div>
                                     <p className="text-xs text-zinc-300 italic">"{strat.evidence}"</p>
                                 </div>
@@ -504,40 +575,53 @@ function MitigationView({ toolsByLayer }: any) {
                     );
                 })}
             </div>
+
+            <div className="mt-12 p-8 bg-zinc-900 border border-zinc-800 rounded-3xl text-center">
+                <h3 className="text-xl font-bold mb-2">Ready to Secure Your Stack?</h3>
+                <p className="text-zinc-500 text-sm mb-6">These mitigations have been injected into your dynamic remediation roadmap.</p>
+                <button
+                    onClick={() => window.dispatchEvent(new CustomEvent('navigate', { detail: 'roadmap' }))}
+                    className="px-8 py-3 bg-emerald-500 hover:bg-emerald-400 text-black font-bold rounded-xl transition-all shadow-lg shadow-emerald-500/20"
+                >
+                    View Remediation Plan
+                </button>
+            </div>
         </div>
     );
 }
 
-function PatternView() {
+function PatternView({ selectedPattern }: any) {
     return (
         <div className="max-w-5xl">
             <div className="mb-12">
                 <h2 className="text-4xl font-bold mb-4">Agentic Architecture Patterns</h2>
-                <p className="text-zinc-500">Assessing organizational risk based on autonomous interaction models.</p>
+                <p className="text-zinc-500">Analysis of autonomous interaction models detected in your architecture.</p>
             </div>
 
             <div className="grid grid-cols-2 gap-6">
                 {AGENTIC_PATTERNS.map(pattern => (
-                    <div key={pattern.name} className="p-8 bg-zinc-900 border border-zinc-800 rounded-3xl hover:border-zinc-500 transition-all flex flex-col">
+                    <div key={pattern.name} className={`p-8 bg-zinc-900 border rounded-3xl transition-all flex flex-col ${selectedPattern === pattern.name.split(' ')[0] || (selectedPattern === 'Multi-Agent' && pattern.name.includes('Multi'))
+                            ? "border-emerald-500 bg-emerald-950/5 ring-1 ring-emerald-500/20 shadow-[0_0_30px_rgba(16,185,129,0.1)]"
+                            : "border-zinc-800"
+                        }`}>
                         <div className="flex justify-between items-start mb-4">
                             <h3 className="text-xl font-bold text-white">{pattern.name}</h3>
-                            <span className={`px-2 py-1 rounded text-[10px] font-bold border ${pattern.riskLevel === 'Critical' ? 'bg-red-500/10 text-red-400 border-red-500/20' :
-                                    pattern.riskLevel === 'High' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
-                                        'bg-blue-500/10 text-blue-400 border-blue-500/20'
-                                }`}>
-                                {pattern.riskLevel.toUpperCase()} RISK
-                            </span>
+                            {selectedPattern && (pattern.name.includes(selectedPattern) || (selectedPattern === 'Multi-Agent' && pattern.name.includes('Multi'))) && (
+                                <span className="px-2 py-1 bg-emerald-500 text-black text-[10px] font-black rounded uppercase">Detected Pattern</span>
+                            )}
                         </div>
-                        <p className="text-zinc-400 text-sm mb-6 flex-1">{pattern.description}</p>
+                        <p className="text-zinc-400 text-sm mb-6 flex-1 leading-relaxed">{pattern.description}</p>
 
                         <div className="space-y-4 pt-6 border-t border-zinc-800">
                             <div>
-                                <div className="text-[10px] font-bold text-red-400/80 uppercase mb-1">Primary Threat</div>
-                                <div className="text-xs text-zinc-300 font-medium leading-relaxed">{pattern.threat}</div>
+                                <div className="text-[10px] font-bold text-red-400/80 uppercase mb-1 flex items-center gap-2">
+                                    <AlertTriangle className="w-3 h-3" /> Theoretical Threat Profile
+                                </div>
+                                <div className="text-xs text-zinc-300 font-medium leading-relaxed italic">"{pattern.threat}"</div>
                             </div>
                             <div className="p-4 bg-zinc-950 rounded-xl border border-zinc-800">
                                 <div className="text-[10px] font-bold text-emerald-500 uppercase mb-2">Prescribed Mitigation</div>
-                                <div className="text-xs text-zinc-400 italic">"{pattern.mitigation}"</div>
+                                <div className="text-xs text-zinc-400 leading-relaxed font-light">{pattern.mitigation}</div>
                             </div>
                         </div>
                     </div>
@@ -547,8 +631,15 @@ function PatternView() {
     );
 }
 
-const ChevronRight = ({ className }: { className?: string }) => (
+// Support Components
+const CheckCircle = ({ className }: { className?: string }) => (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+    </svg>
+);
+
+const Search = ({ className }: { className?: string }) => (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
     </svg>
 );

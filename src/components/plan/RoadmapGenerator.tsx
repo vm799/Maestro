@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { useClient } from '../../context/ClientContext';
-import { Target, Shield, CheckCircle, ChevronRight, X, FileText, Download, BookOpen, AlertCircle } from 'lucide-react';
+import { Target, Shield, CheckCircle, ChevronRight, X, FileText, Download, BookOpen, AlertCircle, Zap } from 'lucide-react';
 
 export function RoadmapGenerator() {
-    const { identifiedRisks, maturityScores } = useClient();
+    const { identifiedRisks, maturityScores, maestroAudit, stack } = useClient();
     const [selectedItem, setSelectedItem] = useState<any>(null);
 
     const literacyGap = 4 - maturityScores.literacy;
@@ -22,7 +22,7 @@ export function RoadmapGenerator() {
                 scale: 'literacy',
                 deliverable: {
                     type: 'Training Deck',
-                    markdown: `# Emergency AI Literacy Bootcamp\n\n**Gap Identified:** Literacy Score ${maturityScores.literacy}/4.0\n\n## Week 1: Foundations\n- What is an LLM?\n- Prompt Engineering 101\n- Understanding Hallucinations\n\n## Week 2: Hands-On\n- Approved Tools Walkthrough\n- Best Practices & Guardrails\n- Quiz & Certification`
+                    markdown: `# Emergency AI Literacy Bootcamp\n\n**Gap Identified:** Literacy Score ${maturityScores.literacy.toFixed(1)}/4.0\n\n## Week 1: Foundations\n- What is an LLM?\n- Prompt Engineering 101\n- Understanding Hallucinations\n\n## Week 2: Hands-On\n- Approved Tools Walkthrough\n- Best Practices & Guardrails\n- Quiz & Certification`
                 }
             });
         }
@@ -55,7 +55,7 @@ export function RoadmapGenerator() {
                 scale: 'governance',
                 deliverable: {
                     type: 'Policy Template',
-                    markdown: `# AI Acceptable Use Policy (DRAFT)\n\n**Gap Identified:** Governance Score ${maturityScores.governance}/4.0 - No policy exists.\n\n## Scope\nAll employees using AI tools for work purposes.\n\n## Prohibited Actions\n- Uploading customer PII to public AI platforms\n- Using AI outputs without human review in legal/financial contexts\n\n## Enforcement\nViolations escalated to HR and CISO.`
+                    markdown: `# AI Acceptable Use Policy (DRAFT)\n\n**Gap Identified:** Governance Score ${maturityScores.governance.toFixed(1)}/4.0 - No policy exists.\n\n## Scope\nAll employees using AI tools for work purposes.\n\n## Prohibited Actions\n- Uploading customer PII to public AI platforms\n- Using AI outputs without human review in legal/financial contexts\n\n## Enforcement\nViolations escalated to HR and CISO.`
                 }
             });
         }
@@ -90,6 +90,39 @@ export function RoadmapGenerator() {
         return items;
     };
 
+    const buildMaestroItems = () => {
+        const items: any[] = [];
+        if (maestroAudit.vulnerabilities.length > 0) {
+            items.push({
+                title: `PATCH: ${maestroAudit.vulnerabilities.length} Framework Vulnerabilities`,
+                type: 'security',
+                tools: stack.map(t => t.name).slice(0, 3),
+                est: '3 days',
+                icon: AlertCircle,
+                scale: 'security',
+                deliverable: {
+                    type: 'Patch Report',
+                    markdown: `# MAESTRO Framework Security Patching\n\n**Objective:** Remediate PhD-level vulnerabilities detected in the 7-layer audit.\n\n## Vulnerabilities Addressed\n${maestroAudit.vulnerabilities.map(v => `- [ ] **${v.id}**: ${v.description} (Severity: ${v.severity.toUpperCase()})`).join('\n')}`
+                }
+            });
+        }
+        maestroAudit.mitigations.forEach(m => {
+            items.push({
+                title: `IMPLEMENT: ${m.title}`,
+                type: 'mitigation',
+                tools: [`Layer ${m.layerRelevance.join(', ')}`],
+                est: '1 week',
+                icon: Zap,
+                scale: 'security',
+                deliverable: {
+                    type: 'Implementation Guide',
+                    markdown: `# Mitigation: ${m.title}\n\n**Evidence Rationale:** ${m.evidence}\n\n## Implementation Steps\n1. Analyze affected layers: ${m.layerRelevance.join(', ')}\n2. Deploy control: ${m.description}\n3. Verify effectiveness via MAESTRO recurring scan.`
+                }
+            });
+        });
+        return items;
+    };
+
     const phases = [
         {
             title: `Phase 1: ${priorityArea === 'governance' ? 'Governance Lockdown' : 'Literacy Uplift'}`,
@@ -99,6 +132,13 @@ export function RoadmapGenerator() {
                 ? `Critical: Governance gap of ${governanceGap.toFixed(1)} points. Lock down policies first.`
                 : `Critical: Literacy gap of ${literacyGap.toFixed(1)} points. Upskill the team first.`,
             items: priorityArea === 'governance' ? buildGovernanceItems() : buildLiteracyItems()
+        },
+        {
+            title: 'Technical Hardening (MAESTRO)',
+            color: 'from-red-400 to-pink-500',
+            duration: 'Urgent / Concurrent',
+            description: 'Direct remediation of detected MAESTRO architectural vulnerabilities.',
+            items: buildMaestroItems()
         },
         {
             title: `Phase 2: ${priorityArea === 'governance' ? 'Literacy Uplift' : 'Governance Lockdown'}`,
@@ -121,7 +161,6 @@ export function RoadmapGenerator() {
                     tools: ['Maestro Platform'],
                     est: 'Quarterly',
                     icon: Target,
-                    scale: 'all',
                     deliverable: {
                         type: 'Process Doc',
                         markdown: `# Quarterly Review Process\n\n1. Re-run the Maturity Assessment\n2. Compare scores to previous quarter\n3. Identify regression areas\n4. Update Roadmap accordingly`
@@ -139,7 +178,7 @@ export function RoadmapGenerator() {
                         <span className="text-emerald-500 font-mono">Phase 2:</span> Dynamic Remediation Roadmap
                     </h1>
                     <p className="text-zinc-400 text-sm mt-1">
-                        Based on: Literacy {maturityScores.literacy.toFixed(1)}/4.0 | Governance {maturityScores.governance.toFixed(1)}/4.0 | {identifiedRisks.length} risks
+                        Based on: Literacy {maturityScores.literacy.toFixed(1)}/4.0 | Governance {maturityScores.governance.toFixed(1)}/4.0 | {maestroAudit.vulnerabilities.length} MAESTRO risks
                     </p>
                 </div>
                 <div className="flex gap-2">
@@ -152,123 +191,100 @@ export function RoadmapGenerator() {
                 </div>
             </header>
 
-            <div className="flex-1 overflow-y-auto p-8">
-                <div className="max-w-5xl mx-auto">
-                    {maturityScores.overall === 0 && identifiedRisks.length === 0 ? (
-                        <div className="text-center py-16">
-                            <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center">
-                                <AlertCircle className="w-12 h-12 text-amber-500" />
+            <div className="flex-1 overflow-y-auto p-8 space-y-12">
+                {phases.map((phase, idx) => (
+                    <div key={idx} className="animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${idx * 150}ms` }}>
+                        <div className="flex items-center gap-4 mb-6">
+                            <div className={`h-12 w-1.5 rounded-full bg-gradient-to-b ${phase.color}`} />
+                            <div>
+                                <h3 className="text-sm font-bold text-zinc-500 uppercase tracking-widest">{phase.duration}</h3>
+                                <h2 className="text-2xl font-bold dark:text-white">{phase.title}</h2>
                             </div>
-                            <h2 className="text-2xl font-bold text-white mb-3">No Assessment Data</h2>
-                            <p className="text-zinc-400 max-w-md mx-auto mb-8">
-                                Complete the Maturity Assessment first to generate a dynamic remediation roadmap based on your actual gaps.
-                            </p>
-                            <button
-                                onClick={() => window.dispatchEvent(new CustomEvent('navigate', { detail: 'assess' }))}
-                                className="px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg transition-all"
-                            >
-                                Go to Assessment
-                            </button>
                         </div>
-                    ) : (
-                        <div className="space-y-8 relative">
-                            <div className="absolute left-8 top-8 bottom-8 w-0.5 bg-zinc-800" />
-                            {phases.map((phase: any, pIdx: number) => (
-                                <div key={pIdx} className="relative z-10 pl-24">
-                                    <div className={`absolute left-0 top-0 w-16 h-16 rounded-2xl bg-gradient-to-br ${phase.color} flex items-center justify-center font-bold text-2xl shadow-lg text-white border border-white/10`}>
-                                        {pIdx + 1}
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {phase.items.map((item: any, i: number) => (
+                                <button
+                                    key={i}
+                                    onClick={() => setSelectedItem(item)}
+                                    className="p-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl text-left hover:border-emerald-500/50 hover:shadow-xl hover:shadow-emerald-500/5 transition-all group relative overflow-hidden"
+                                >
+                                    <div className="flex justify-between items-start mb-4">
+                                        <div className="p-3 bg-zinc-100 dark:bg-zinc-800 rounded-xl group-hover:bg-emerald-500/10 transition-colors">
+                                            <item.icon className="w-5 h-5 text-zinc-600 dark:text-zinc-400 group-hover:text-emerald-500" />
+                                        </div>
+                                        <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-tighter bg-zinc-100 dark:bg-zinc-800 px-2 py-1 rounded">
+                                            {item.est}
+                                        </span>
                                     </div>
-                                    <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 group">
-                                        <div className="flex justify-between items-start mb-6">
-                                            <div>
-                                                <h3 className={`text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r ${phase.color}`}>
-                                                    {phase.title}
-                                                </h3>
-                                                <p className="text-zinc-500 text-sm mt-1">{phase.description}</p>
-                                            </div>
-                                            <span className="text-xs font-mono font-bold text-zinc-600 px-3 py-1 rounded-full bg-zinc-950 border border-zinc-800">
-                                                {phase.duration}
+                                    <h4 className="font-bold dark:text-white mb-2 leading-tight">{item.title}</h4>
+                                    <div className="flex flex-wrap gap-1 mt-auto">
+                                        {item.tools.map((t: string) => (
+                                            <span key={t} className="text-[9px] text-zinc-500 border border-zinc-200 dark:border-zinc-800 px-1.5 py-0.5 rounded">
+                                                {t}
                                             </span>
-                                        </div>
-                                        <div className="space-y-3">
-                                            {phase.items.map((item: any, i: number) => (
-                                                <button
-                                                    key={i}
-                                                    onClick={() => setSelectedItem(item)}
-                                                    className="w-full flex items-center justify-between p-3 bg-zinc-950 rounded-lg border border-zinc-800/50 hover:border-zinc-500/50 hover:bg-zinc-900 transition-all text-left"
-                                                >
-                                                    <div className="flex items-center gap-3">
-                                                        <div className={`p-2 rounded-md ${item.type === 'tech' ? 'bg-blue-500/10 text-blue-500' :
-                                                            item.type === 'governance' ? 'bg-amber-500/10 text-amber-400' :
-                                                                item.type === 'critical' ? 'bg-red-500/10 text-red-500' : 'bg-purple-500/10 text-purple-400'
-                                                            }`}>
-                                                            <item.icon className="w-4 h-4" />
-                                                        </div>
-                                                        <div>
-                                                            <span className="font-semibold text-zinc-300 text-sm">{item.title}</span>
-                                                            <div className="text-[10px] text-zinc-500 flex items-center gap-1 mt-0.5">
-                                                                <FileText className="w-3 h-3" />
-                                                                {item.deliverable?.type || "Deliverable"}
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div className="flex items-center gap-4">
-                                                        <div className="flex gap-1.5">
-                                                            {item.tools?.map((tool: string) => (
-                                                                <span key={tool} className="text-[10px] px-2 py-0.5 rounded bg-zinc-900 text-zinc-500 border border-zinc-800 font-mono">
-                                                                    {tool}
-                                                                </span>
-                                                            ))}
-                                                        </div>
-                                                        <span className="text-xs font-mono text-zinc-600">{item.est}</span>
-                                                        <ChevronRight className="w-4 h-4 text-zinc-700" />
-                                                    </div>
-                                                </button>
-                                            ))}
-                                        </div>
+                                        ))}
                                     </div>
-                                </div>
+                                </button>
                             ))}
                         </div>
-                    )}
-                </div>
+                    </div>
+                ))}
             </div>
 
+            {/* Slide-over Detail Panel */}
             {selectedItem && (
-                <div className="absolute inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-8">
-                    <div className="bg-zinc-900 border border-zinc-700 rounded-xl shadow-2xl w-full max-w-2xl max-h-full flex flex-col overflow-hidden">
-                        <header className="px-6 py-4 border-b border-zinc-800 flex justify-between items-center bg-zinc-900">
-                            <div className="flex items-center gap-3">
-                                <div className="p-2 bg-zinc-800 rounded-lg">
-                                    <FileText className="w-5 h-5 text-zinc-300" />
+                <div className="fixed inset-0 z-[100] flex justify-end animate-in fade-in duration-300">
+                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setSelectedItem(null)} />
+                    <div className="w-full max-w-2xl bg-white dark:bg-zinc-900 h-full shadow-2xl relative animate-in slide-in-from-right duration-500 flex flex-col">
+                        <div className="p-8 border-b border-zinc-200 dark:border-zinc-800 flex justify-between items-center bg-zinc-50 dark:bg-zinc-900/50">
+                            <div className="flex items-center gap-4">
+                                <div className="p-3 bg-emerald-500/10 rounded-2xl">
+                                    <selectedItem.icon className="w-6 h-6 text-emerald-500" />
                                 </div>
-                                <div className="text-left">
-                                    <h3 className="font-bold text-white">{selectedItem.deliverable?.type}</h3>
-                                    <p className="text-xs text-zinc-500 uppercase tracking-wider">For: {selectedItem.title}</p>
+                                <div>
+                                    <h3 className="text-xs font-bold text-emerald-500 uppercase tracking-widest">{selectedItem.type}</h3>
+                                    <h2 className="text-xl font-bold dark:text-white">{selectedItem.title}</h2>
                                 </div>
                             </div>
-                            <button onClick={() => setSelectedItem(null)} className="p-2 hover:bg-zinc-800 rounded-lg text-zinc-400">
-                                <X className="w-5 h-5" />
+                            <button onClick={() => setSelectedItem(null)} className="p-2 hover:bg-zinc-200 dark:hover:bg-zinc-800 rounded-xl transition-colors">
+                                <X className="w-6 h-6 text-zinc-400" />
                             </button>
-                        </header>
-                        <div className="flex-1 overflow-y-auto p-8 bg-zinc-950/50">
-                            <div className="prose prose-invert prose-sm max-w-none text-left">
-                                {selectedItem.deliverable?.markdown.split('\n').map((line: string, i: number) => {
-                                    if (line.startsWith('# ')) return <h1 key={i} className="text-2xl font-bold mb-4 text-white pb-2 border-b border-zinc-800">{line.replace('# ', '')}</h1>;
-                                    if (line.startsWith('## ')) return <h2 key={i} className="text-lg font-bold mt-6 mb-3 text-emerald-400">{line.replace('## ', '')}</h2>;
-                                    if (line.startsWith('**')) return <p key={i} className="font-bold my-2 text-zinc-200">{line.replace(/\*\*/g, '')}</p>;
-                                    if (line.startsWith('- ')) return <li key={i} className="ml-4 text-zinc-400 list-disc my-1">{line.replace('- ', '')}</li>;
-                                    if (line === '') return <br key={i} />;
-                                    return <p key={i} className="text-zinc-400 leading-relaxed mb-2">{line}</p>;
-                                })}
+                        </div>
+
+                        <div className="flex-1 overflow-y-auto p-10">
+                            <div className="prose dark:prose-invert max-w-none">
+                                <div className="flex items-center gap-2 text-sm text-zinc-500 mb-8 pb-8 border-b border-zinc-100 dark:border-zinc-800">
+                                    <FileText className="w-4 h-4" />
+                                    <span>Deliverable Type: <strong>{selectedItem.deliverable.type}</strong></span>
+                                    <span className="mx-2">|</span>
+                                    <span>Estimated Effort: <strong>{selectedItem.est}</strong></span>
+                                </div>
+
+                                <div className="space-y-4">
+                                    {selectedItem.deliverable.markdown.split('\n').map((line: string, i: number) => {
+                                        if (line.startsWith('# ')) return <h1 key={i} className="text-3xl font-black mt-10 mb-6">{line.replace('# ', '')}</h1>;
+                                        if (line.startsWith('## ')) return <h2 key={i} className="text-xl font-bold mt-8 mb-4 flex items-center gap-2">
+                                            <div className="w-2 h-2 rounded-full bg-emerald-500" />
+                                            {line.replace('## ', '')}
+                                        </h2>;
+                                        if (line.startsWith('- ')) return <div key={i} className="flex gap-3 mb-2 text-zinc-400">
+                                            <ChevronRight className="w-4 h-4 shrink-0 mt-1 text-emerald-500" />
+                                            <span>{line.replace('- ', '')}</span>
+                                        </div>;
+                                        if (line.startsWith('**')) return <p key={i} className="text-zinc-300 font-bold mb-4">{line.replace(/\*\*/g, '')}</p>;
+                                        return <p key={i} className="text-zinc-400 mb-4 leading-relaxed">{line}</p>;
+                                    })}
+                                </div>
                             </div>
                         </div>
-                        <footer className="p-4 border-t border-zinc-800 bg-zinc-900 flex justify-between items-center">
-                            <span className="text-xs text-zinc-500 font-mono">Generated by Maestro-Content-Engine v4.2</span>
-                            <button className="bg-white text-black px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2">
-                                <Download className="w-4 h-4" /> Export PDF
+
+                        <div className="p-8 border-t border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50 flex gap-4">
+                            <button className="flex-1 py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-2xl flex items-center justify-center gap-3 transition-all shadow-lg shadow-emerald-600/20 group">
+                                <Download className="w-5 h-5 group-hover:translate-y-0.5 transition-transform" />
+                                Generate Deliverable
                             </button>
-                        </footer>
+                        </div>
                     </div>
                 </div>
             )}
