@@ -1,4 +1,3 @@
-import React from 'react';
 import { X, Code, Zap, Shield, Database, Network } from 'lucide-react';
 
 interface AgentBlueprintProps {

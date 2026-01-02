@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Share2, MessageSquare, Database, AlertTriangle, ArrowRight, X, Cloud, Code, Server } from 'lucide-react';
+import { Share2, MessageSquare, Database, ArrowRight, X, Cloud, Code, Server } from 'lucide-react';
 import { useClient, type ToolNode } from '../../context/ClientContext';
 
 const AVAILABLE_TOOLS: any[] = [
@@ -28,7 +28,7 @@ const AVAILABLE_TOOLS: any[] = [
 ];
 
 export function StackMap() {
-    const { stack, connections, addTool: ctxAddTool, updateToolPosition, removeTool: ctxRemoveTool, addConnection, removeConnection, frictionCost } = useClient();
+    const { stack, connections, addTool: ctxAddTool, updateToolPosition, removeTool: ctxRemoveTool, addConnection, frictionCost } = useClient();
     const [isDragging, setIsDragging] = useState(false);
     const [draggedToolId, setDraggedToolId] = useState<string | null>(null);
     const [selectedToolId, setSelectedToolId] = useState<string | null>(null);
@@ -93,7 +93,7 @@ export function StackMap() {
         const newTool = {
             id: `custom-${Date.now()}`,
             name: customToolName,
-            category: 'other',
+            category: 'other' as any,
             icon: Server,
             risky: true,
             layer: selectedLayer,

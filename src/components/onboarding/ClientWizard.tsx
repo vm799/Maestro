@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { ArrowRight, Building, Users, Target, Check } from 'lucide-react';
+import { useState } from 'react';
+import { ArrowRight, Building, Check } from 'lucide-react';
 
 interface ClientWizardProps {
     onComplete: (clientData: any) => void;
@@ -73,8 +73,8 @@ export function ClientWizard({ onComplete }: ClientWizardProps) {
                                     key={pt}
                                     onClick={() => setData({ ...data, painPoints: data.painPoints.includes(pt) ? data.painPoints.filter(p => p !== pt) : [...data.painPoints, pt] })}
                                     className={`p-4 rounded-lg border cursor-pointer transition-all flex items-center justify-between ${data.painPoints.includes(pt)
-                                            ? "bg-primary/5 border-primary ring-1 ring-primary"
-                                            : "bg-background border-border hover:border-primary/50"
+                                        ? "bg-primary/5 border-primary ring-1 ring-primary"
+                                        : "bg-background border-border hover:border-primary/50"
                                         }`}
                                 >
                                     <span className="text-sm font-medium">{pt}</span>

@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useClient } from '../../context/ClientContext';
-import { Shield, Zap, Activity, Bot, AlertTriangle, CheckCircle, BarChart3 } from 'lucide-react';
+import { Shield, Zap, Activity, Bot } from 'lucide-react';
 import { AgentBlueprint } from './AgentBlueprint';
 
 export function AIOpsDashboard() {
@@ -8,7 +8,7 @@ export function AIOpsDashboard() {
 
     // Simulate "Live" Metrics
     const [events, setEvents] = useState<string[]>([]);
-    const [selectedAgent, setSelectedAgent] = React.useState<any>(null); // For modal
+    const [selectedAgent, setSelectedAgent] = useState<any>(null); // For modal
 
     useEffect(() => {
         const interval = setInterval(() => {
