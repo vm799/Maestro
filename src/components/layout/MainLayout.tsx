@@ -7,6 +7,7 @@ import { AIOpsDashboard } from '../governance/AIOpsDashboard';
 import { AuditScout } from '../assess/AuditScout';
 import { Dashboard } from '../Dashboard';
 import { RoadmapGenerator } from '../plan/RoadmapGenerator';
+import { MaestroExplainer } from '../assess/MaestroExplainer';
 import { useClient } from '../../context/ClientContext';
 
 export function MainLayout() {
@@ -23,8 +24,12 @@ export function MainLayout() {
     const renderContent = () => {
         switch (activeView) {
             case 'stackmap': return <StackMap />;
-            case 'scout': return <AuditScout />;
-            case 'assess': return <MaturityAssessment />;
+            case 'scout':
+                return <AuditScout />;
+            case 'maestro':
+                return <MaestroExplainer />;
+            case 'assess':
+                return <MaturityAssessment />;
             case 'roadmap': return <RoadmapGenerator />;
             case 'studio': return <ContentStudio />;
             case 'aiops': return <AIOpsDashboard />;

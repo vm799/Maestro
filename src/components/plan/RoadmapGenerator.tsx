@@ -1,19 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useClient } from '../../context/ClientContext';
-import { Target, ArrowRight, Shield, Zap, CheckCircle, Lock, Clock, Wrench, ChevronRight, DollarSign, X, FileText, Download, BookOpen, AlertCircle } from 'lucide-react';
+import { Target, Shield, CheckCircle, ChevronRight, X, FileText, Download, BookOpen, AlertCircle } from 'lucide-react';
 
 export function RoadmapGenerator() {
-    const { identifiedRisks, frictionCost, shieldScore, spearScore, maturityScores } = useClient();
+    const { identifiedRisks, maturityScores } = useClient();
     const [selectedItem, setSelectedItem] = useState<any>(null);
 
-    // DYNAMIC: Generate remediation based on actual gaps
     const literacyGap = 4 - maturityScores.literacy;
     const governanceGap = 4 - maturityScores.governance;
-
-    // Determine which scale needs more attention
     const priorityArea = literacyGap > governanceGap ? 'literacy' : 'governance';
 
-    // Build dynamic remediation items based on gaps
     const buildLiteracyItems = () => {
         const items: any[] = [];
         if (maturityScores.literacy < 2) {
@@ -94,7 +90,6 @@ export function RoadmapGenerator() {
         return items;
     };
 
-    // Assemble phases based on actual gaps
     const phases = [
         {
             title: `Phase 1: ${priorityArea === 'governance' ? 'Governance Lockdown' : 'Literacy Uplift'}`,
@@ -103,7 +98,6 @@ export function RoadmapGenerator() {
             description: priorityArea === 'governance'
                 ? `Critical: Governance gap of ${governanceGap.toFixed(1)} points. Lock down policies first.`
                 : `Critical: Literacy gap of ${literacyGap.toFixed(1)} points. Upskill the team first.`,
-            gapScore: priorityArea === 'governance' ? governanceGap : literacyGap,
             items: priorityArea === 'governance' ? buildGovernanceItems() : buildLiteracyItems()
         },
         {
@@ -113,7 +107,6 @@ export function RoadmapGenerator() {
             description: priorityArea === 'governance'
                 ? `Secondary: Literacy gap of ${literacyGap.toFixed(1)} points. Train the workforce.`
                 : `Secondary: Governance gap of ${governanceGap.toFixed(1)} points. Establish controls.`,
-            gapScore: priorityArea === 'governance' ? literacyGap : governanceGap,
             items: priorityArea === 'governance' ? buildLiteracyItems() : buildGovernanceItems()
         },
         {
@@ -121,7 +114,6 @@ export function RoadmapGenerator() {
             color: 'from-emerald-400 to-teal-500',
             duration: 'Ongoing',
             description: 'Maintain 4.0 maturity across all scales with continuous monitoring.',
-            gapScore: 0,
             items: [
                 {
                     title: 'Quarterly Maturity Re-Assessment',
@@ -137,17 +129,17 @@ export function RoadmapGenerator() {
                 }
             ]
         }
-    ].filter(p => p.items.length > 0 || p.title.includes('Sustained')); // Only show phases with items
+    ].filter(p => p.items.length > 0 || p.title.includes('Sustained'));
 
     return (
         <div className="h-full flex flex-col bg-zinc-50 dark:bg-zinc-950 overflow-hidden relative">
-            <header className="px-8 py-6 border-b border-zinc-800 bg-zinc-900/50 flex justify-between items-center flex-wrap gap-4">
+            <header className="px-8 py-6 border-b border-zinc-800 bg-zinc-900/50 flex justify-between items-center flex-wrap gap-4 text-white">
                 <div>
-                    <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2 text-white">
+                    <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
                         <span className="text-emerald-500 font-mono">Phase 2:</span> Dynamic Remediation Roadmap
                     </h1>
                     <p className="text-zinc-400 text-sm mt-1">
-                        Based on: Literacy {maturityScores.literacy.toFixed(1)}/4.0 (Gap: {literacyGap.toFixed(1)}) • Governance {maturityScores.governance.toFixed(1)}/4.0 (Gap: {governanceGap.toFixed(1)}) • {identifiedRisks.length} risks • ${frictionCost.toLocaleString()}/mo friction
+                        Based on: Literacy {maturityScores.literacy.toFixed(1)}/4.0 | Governance {maturityScores.governance.toFixed(1)}/4.0 | {identifiedRisks.length} risks
                     </p>
                 </div>
                 <div className="flex gap-2">
@@ -162,7 +154,6 @@ export function RoadmapGenerator() {
 
             <div className="flex-1 overflow-y-auto p-8">
                 <div className="max-w-5xl mx-auto">
-                    {/* Check if assessment has been completed */}
                     {maturityScores.overall === 0 && identifiedRisks.length === 0 ? (
                         <div className="text-center py-16">
                             <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center">
@@ -170,41 +161,24 @@ export function RoadmapGenerator() {
                             </div>
                             <h2 className="text-2xl font-bold text-white mb-3">No Assessment Data</h2>
                             <p className="text-zinc-400 max-w-md mx-auto mb-8">
-                                Complete the <strong>Maturity Assessment</strong> first to generate a dynamic remediation roadmap based on your actual gaps.
+                                Complete the Maturity Assessment first to generate a dynamic remediation roadmap based on your actual gaps.
                             </p>
                             <button
                                 onClick={() => window.dispatchEvent(new CustomEvent('navigate', { detail: 'assess' }))}
                                 className="px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg transition-all"
                             >
-                                Go to Assessment →
+                                Go to Assessment
                             </button>
-
-                            <div className="mt-12 grid grid-cols-2 gap-6 max-w-xl mx-auto text-left">
-                                <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
-                                    <div className="text-xs text-zinc-500 uppercase mb-1">Literacy Gap</div>
-                                    <div className="text-2xl font-bold text-blue-400">?/4.0</div>
-                                    <div className="text-xs text-zinc-500 mt-1">Complete assessment</div>
-                                </div>
-                                <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
-                                    <div className="text-xs text-zinc-500 uppercase mb-1">Governance Gap</div>
-                                    <div className="text-2xl font-bold text-amber-400">?/4.0</div>
-                                    <div className="text-xs text-zinc-500 mt-1">Complete assessment</div>
-                                </div>
-                            </div>
                         </div>
                     ) : (
                         <div className="space-y-8 relative">
-                            {/* Connecting Line */}
                             <div className="absolute left-8 top-8 bottom-8 w-0.5 bg-zinc-800" />
-
-                            {phases.map((phase, pIdx) => (
-                                <div key={pIdx} className="relative z-10 pl-24 animate-in fade-in slide-in-from-bottom-4 duration-700" style={{ animationDelay: `${pIdx * 150}ms` }}>
-                                    {/* Phase Marker */}
+                            {phases.map((phase: any, pIdx: number) => (
+                                <div key={pIdx} className="relative z-10 pl-24">
                                     <div className={`absolute left-0 top-0 w-16 h-16 rounded-2xl bg-gradient-to-br ${phase.color} flex items-center justify-center font-bold text-2xl shadow-lg text-white border border-white/10`}>
                                         {pIdx + 1}
                                     </div>
-
-                                    <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 hover:border-zinc-700 transition-all group">
+                                    <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 group">
                                         <div className="flex justify-between items-start mb-6">
                                             <div>
                                                 <h3 className={`text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r ${phase.color}`}>
@@ -216,23 +190,22 @@ export function RoadmapGenerator() {
                                                 {phase.duration}
                                             </span>
                                         </div>
-
                                         <div className="space-y-3">
-                                            {phase.items.map((item, i) => (
+                                            {phase.items.map((item: any, i: number) => (
                                                 <button
                                                     key={i}
                                                     onClick={() => setSelectedItem(item)}
-                                                    className="w-full flex items-center justify-between p-3 bg-zinc-950 rounded-lg border border-zinc-800/50 hover:border-zinc-500/50 hover:bg-zinc-900 transition-all group/item cursor-pointer text-left"
+                                                    className="w-full flex items-center justify-between p-3 bg-zinc-950 rounded-lg border border-zinc-800/50 hover:border-zinc-500/50 hover:bg-zinc-900 transition-all text-left"
                                                 >
                                                     <div className="flex items-center gap-3">
-                                                        <div className={`p-2 rounded-md transition-colors ${item.type === 'tech' ? 'bg-blue-500/10 text-blue-500 group-hover/item:bg-blue-500/20' :
-                                                            item.type === 'governance' ? 'bg-amber-500/10 text-amber-400 group-hover/item:bg-amber-500/20' :
-                                                                item.type === 'critical' ? 'bg-red-500/10 text-red-500 group-hover/item:bg-red-500/20' : 'bg-purple-500/10 text-purple-400 group-hover/item:bg-purple-500/20'
+                                                        <div className={`p-2 rounded-md ${item.type === 'tech' ? 'bg-blue-500/10 text-blue-500' :
+                                                            item.type === 'governance' ? 'bg-amber-500/10 text-amber-400' :
+                                                                item.type === 'critical' ? 'bg-red-500/10 text-red-500' : 'bg-purple-500/10 text-purple-400'
                                                             }`}>
                                                             <item.icon className="w-4 h-4" />
                                                         </div>
                                                         <div>
-                                                            <span className="font-semibold text-zinc-300 text-sm group-hover/item:text-white transition-colors">{item.title}</span>
+                                                            <span className="font-semibold text-zinc-300 text-sm">{item.title}</span>
                                                             <div className="text-[10px] text-zinc-500 flex items-center gap-1 mt-0.5">
                                                                 <FileText className="w-3 h-3" />
                                                                 {item.deliverable?.type || "Deliverable"}
@@ -241,14 +214,14 @@ export function RoadmapGenerator() {
                                                     </div>
                                                     <div className="flex items-center gap-4">
                                                         <div className="flex gap-1.5">
-                                                            {item.tools?.map(tool => (
+                                                            {item.tools?.map((tool: string) => (
                                                                 <span key={tool} className="text-[10px] px-2 py-0.5 rounded bg-zinc-900 text-zinc-500 border border-zinc-800 font-mono">
                                                                     {tool}
                                                                 </span>
                                                             ))}
                                                         </div>
-                                                        <span className="text-xs font-mono text-zinc-600 hidden sm:block">{item.est}</span>
-                                                        <ChevronRight className="w-4 h-4 text-zinc-700 group-hover/item:text-white transition-colors" />
+                                                        <span className="text-xs font-mono text-zinc-600">{item.est}</span>
+                                                        <ChevronRight className="w-4 h-4 text-zinc-700" />
                                                     </div>
                                                 </button>
                                             ))}
@@ -261,31 +234,25 @@ export function RoadmapGenerator() {
                 </div>
             </div>
 
-            {/* Deliverable Modal */}
             {selectedItem && (
-                <div className="absolute inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-8 animate-in fade-in duration-200">
-                    <div className="bg-zinc-900 border border-zinc-700 rounded-xl shadow-2xl w-full max-w-2xl max-h-full flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
+                <div className="absolute inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-8">
+                    <div className="bg-zinc-900 border border-zinc-700 rounded-xl shadow-2xl w-full max-w-2xl max-h-full flex flex-col overflow-hidden">
                         <header className="px-6 py-4 border-b border-zinc-800 flex justify-between items-center bg-zinc-900">
                             <div className="flex items-center gap-3">
                                 <div className="p-2 bg-zinc-800 rounded-lg">
                                     <FileText className="w-5 h-5 text-zinc-300" />
                                 </div>
-                                <div>
+                                <div className="text-left">
                                     <h3 className="font-bold text-white">{selectedItem.deliverable?.type}</h3>
                                     <p className="text-xs text-zinc-500 uppercase tracking-wider">For: {selectedItem.title}</p>
                                 </div>
                             </div>
-                            <button
-                                onClick={() => setSelectedItem(null)}
-                                className="p-2 hover:bg-zinc-800 rounded-lg transition-colors text-zinc-400 hover:text-white"
-                            >
+                            <button onClick={() => setSelectedItem(null)} className="p-2 hover:bg-zinc-800 rounded-lg text-zinc-400">
                                 <X className="w-5 h-5" />
                             </button>
                         </header>
-
                         <div className="flex-1 overflow-y-auto p-8 bg-zinc-950/50">
-                            <div className="prose prose-invert prose-sm max-w-none">
-                                {/* Simple Markdown Rendering Simulation */}
+                            <div className="prose prose-invert prose-sm max-w-none text-left">
                                 {selectedItem.deliverable?.markdown.split('\n').map((line: string, i: number) => {
                                     if (line.startsWith('# ')) return <h1 key={i} className="text-2xl font-bold mb-4 text-white pb-2 border-b border-zinc-800">{line.replace('# ', '')}</h1>;
                                     if (line.startsWith('## ')) return <h2 key={i} className="text-lg font-bold mt-6 mb-3 text-emerald-400">{line.replace('## ', '')}</h2>;
@@ -296,10 +263,9 @@ export function RoadmapGenerator() {
                                 })}
                             </div>
                         </div>
-
                         <footer className="p-4 border-t border-zinc-800 bg-zinc-900 flex justify-between items-center">
                             <span className="text-xs text-zinc-500 font-mono">Generated by Maestro-Content-Engine v4.2</span>
-                            <button className="bg-white text-black px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 hover:bg-zinc-200 transition-colors">
+                            <button className="bg-white text-black px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2">
                                 <Download className="w-4 h-4" /> Export PDF
                             </button>
                         </footer>
