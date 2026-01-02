@@ -5,6 +5,7 @@ import {
     BarChart3, ExternalLink
 } from 'lucide-react';
 import { useClient, type ToolNode, type Mitigation } from '../../context/ClientContext';
+import { ExpertBrief } from '../shared/ExpertBrief';
 
 // --- Types & Data ---
 
@@ -12,6 +13,10 @@ interface Threat {
     id: string;
     title: string;
     description: string;
+    analogy: string;
+    rationale: string;
+    source: string;
+    sourceUrl: string;
 }
 
 interface MaestroLayer {
@@ -27,103 +32,145 @@ const MAESTRO_LAYERS: MaestroLayer[] = [
     {
         id: 7,
         name: "Layer 7: Agent Ecosystem",
-        description: "The marketplace and interface layer where AI agents interact with users and business applications.",
+        description: "The interaction plane where autonomous agents interface with users, external APIs, and business applications.",
         icon: Globe,
         color: "text-blue-400",
         threats: [
-            { id: "L7-C1", title: "Compromised Agents", description: "Malicious AI agents designed to perform harmful actions, infiltrating the ecosystem by posing as legitimate services." },
-            { id: "L7-IA", title: "Agent Identity Attack", description: "Attacks that compromise the identity and authorization mechanisms of AI agents, resulting in unauthorized access." },
-            { id: "L7-GZ", title: "Agent Goal Manipulation", description: "Attackers manipulating the intended goals of AI agents, causing them to pursue objectives different from their original purpose." },
-            { id: "L7-TM", title: "Agent Tool Misuse", description: "AI agents being manipulated to utilize their tools in ways not intended, leading to unforeseen harmful actions." },
-            { id: "L7-MM", title: "Marketplace Manipulation", description: "False ratings, reviews, or recommendations designed to promote malicious AI agents." },
-            { id: "L7-IR", title: "Integration Risks", description: "Vulnerabilities in APIs or SDKs used to integrate AI agents with other systems." },
-            { id: "L7-REP", title: "Repudiation", description: "AI agents denying actions they performed, creating accountability issues in the system." },
-            { id: "L7-AR", title: "Compromised Agent Registry", description: "Manipulating agent listings to inject malicious entries or modify details of legitimate agents." }
+            {
+                id: "LLM08",
+                title: "Excessive Agency",
+                description: "Granting agents overly broad permissions or autonomy, leading to unintended actions in horizontal applications.",
+                analogy: "Like giving a robot helper the keys to your entire house when it only needs to vacuum the living room.",
+                rationale: "Excessive autonomy without human-in-the-loop (HITL) increases the blast radius of prompt injections and model failures.",
+                source: "OWASP Top 10 for LLM Applications",
+                sourceUrl: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+            },
+            {
+                id: "LLM09",
+                title: "Overreliance",
+                description: "Uncritical acceptance of agent outputs without human oversight, leading to the propagation of errors.",
+                analogy: "Following a GPS blindly even when it tells you to drive into a lake.",
+                rationale: "Organizational dependency on stochastic model outputs without validation protocols creates systemic risk in decision-making.",
+                source: "OWASP Top 10 for LLM Applications",
+                sourceUrl: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+            }
         ]
     },
     {
         id: 6,
-        name: "Layer 6: Security & Compliance (Vertical)",
-        description: "A vertical layer ensuring security and compliance controls are integrated into all operations.",
+        name: "Layer 6: Security & Compliance",
+        description: "The governance framework (Govern Function) ensuring alignment with regulatory and safety standards.",
         icon: Lock,
         color: "text-purple-400",
         threats: [
-            { id: "L6-DP", title: "Security Agent Data Poisoning", description: "Manipulating training data used by AI security agents, causing them to misidentify threats." },
-            { id: "L6-EV", title: "Evasion of Security AI Agents", description: "Using adversarial techniques to bypass security AI agents' detection capabilities." },
-            { id: "L6-COM", title: "Compromised Security AI Agents", description: "Attackers gaining control over AI security agents to disable security systems." },
-            { id: "L6-NC", title: "Regulatory Non-Compliance", description: "AI security agents operating in violation of privacy regulations due to misconfiguration." },
-            { id: "L6-BIAS", title: "Bias in Security AI Agents", description: "Biases leading to unfair or discriminatory security practices." },
-            { id: "L6-XAI", title: "Lack of Explainability", description: "Transparency issues causing difficulty in auditing actions or identifying root causes of failure." }
+            {
+                id: "NIST-GOV",
+                title: "Governance Deficit",
+                description: "Failure to establish a risk management culture and accountability for AI systems.",
+                analogy: "Building a skyscraper without any building codes or safety inspections.",
+                rationale: "Lack of GOVERN-function adherence leads to non-compliance with EU AI Act and NIST AI RMF 1.0 mandates.",
+                source: "NIST AI Risk Management Framework",
+                sourceUrl: "https://www.nist.gov/itl/ai-risk-management-framework"
+            }
         ]
     },
     {
         id: 5,
         name: "Layer 5: Evaluation & Observability",
-        description: "Tools and processes for tracking AI performance, detecting anomalies, and ensuring reliability.",
+        description: "The MEASURE function (NIST) for tracking performance, detecting anomalies, and ensuring long-term reliability.",
         icon: Eye,
         color: "text-emerald-400",
         threats: [
-            { id: "L5-MET", title: "Manipulation of Evaluation Metrics", description: "Influencing benchmarks to favor certain agents via poisoned datasets or biased test cases." },
-            { id: "L5-OTC", title: "Compromised Observability Tools", description: "Injecting malicious code into monitoring systems to exfiltrate data or hide behavior." },
-            { id: "L5-DOS", title: "DoS on Evaluation Infrastructure", description: "Disrupting testing processes to prevent detection of compromised behavior." },
-            { id: "L5-EV", title: "Evasion of Detection", description: "Agents designed to avoid triggering alerts or being flagged by observability systems." },
-            { id: "L5-LEAK", title: "Data Leakage through Observability", description: "Sensitive information exposed through logs or monitoring dashboards." }
+            {
+                id: "LLM07",
+                title: "Insecure Plugin Design",
+                description: "Vulnerabilities in extensions or monitoring tools that interface with the agent core.",
+                analogy: "Using a cheap, knock-off security camera that actually lets hackers see inside your house.",
+                rationale: "Evaluation tools often require elevated privileges, making them high-value targets for lateral movement.",
+                source: "OWASP Top 10 for LLM Applications",
+                sourceUrl: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+            }
         ]
     },
     {
         id: 4,
         name: "Layer 4: Deployment & Infrastructure",
-        description: "The underlying compute and orchestration environment (Cloud, K8s, On-prem).",
+        description: "The orchestration and compute environment (Kubernetes, Serverless) where AI assets reside.",
         icon: Box,
         color: "text-amber-400",
         threats: [
-            { id: "L4-IMG", title: "Compromised Container Images", description: "Malicious code injected into AI agent containers infecting production systems." },
-            { id: "L4-ORC", title: "Orchestration Attacks", description: "Exploiting K8s or similar systems to gain unauthorized control over AI deployments." },
-            { id: "L4-IAC", title: "IaC Manipulation", description: "Tampering with Terraform/CloudFormation to provision insecure or compromised resources." },
-            { id: "L4-DOS", title: "Denial of Service (DoS)", description: "Overwhelming infrastructure resources to make AI systems unavailable." },
-            { id: "L4-LAT", title: "Lateral Movement", description: "Gaining access to one part of the infrastructure to compromise other sensitive AI areas." }
+            {
+                id: "LLM04",
+                title: "Model Denial of Service",
+                description: "Resource exhaustion attacks targeting model endpoints or orchestration layers.",
+                analogy: "Prank callers calling a pizza shop so many times that real customers can't get through to order.",
+                rationale: "Stochastic models are computationally expensive; lack of rate-limiting at the infra layer leads to service total failure.",
+                source: "OWASP Top 10 for LLM Applications",
+                sourceUrl: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+            }
         ]
     },
     {
         id: 3,
         name: "Layer 3: Agent Frameworks",
-        description: "The developer toolkits (LangChain, AutoGen) and orchestration frameworks.",
+        description: "Development toolkits (LangChain, AutoGen) used to build and orchestrate agent logic.",
         icon: Activity,
         color: "text-indigo-400",
         threats: [
-            { id: "L3-COM", title: "Compromised Framework Components", description: "Malicious code in libraries or modules used by AI development frameworks." },
-            { id: "L3-BACK", title: "Backdoor Attacks", description: "Hidden vulnerabilities in frameworks exploited to gain unauthorized access." },
-            { id: "L3-VAL", title: "Input Validation Attacks", description: "Exploiting weaknesses in input handling allowing for code injection." },
-            { id: "L3-SC", title: "Supply Chain Attacks", description: "Targeting framework dependencies to compromise software before distribution." },
-            { id: "L3-DOS", title: "DoS on Framework APIs", description: "Overloading services to prevent normal operation of the AI agents." }
+            {
+                id: "LLM05",
+                title: "Supply Chain Vulnerabilities",
+                description: "Risks from third-party libraries, datasets, and pre-trained models in the dev pipeline.",
+                analogy: "Using a recipe that calls for an ingredient that's been recalled for being contaminated.",
+                rationale: "Framework dependencies are often opaque, allowing malicious code to persist across multiple agent deployments.",
+                source: "OWASP Top 10 for LLM Applications",
+                sourceUrl: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+            }
         ]
     },
     {
         id: 2,
         name: "Layer 2: Data Operations",
-        description: "Processing, vector storage, RAG pipelines, and data preparation.",
+        description: "Vector storage, RAG pipelines, and data preparation workflows (MAP Function).",
         icon: Database,
         color: "text-rose-400",
         threats: [
-            { id: "L2-PSN", title: "Data Poisoning", description: "Manipulating training or retrieval data to compromise AI agent behavior." },
-            { id: "L2-EXF", title: "Data Exfiltration", description: "Stealing sensitive AI information from vector stores or databases." },
-            { id: "L2-TAMP", title: "Data Tampering", description: "Modifying AI data in transit or at rest, leading to incorrect agent behavior." },
-            { id: "L2-RAG", title: "Compromised RAG Pipelines", description: "Injecting malicious data into retrieval workflows to cause erroneous results." },
-            { id: "L2-DOS", title: "DoS on Data Infrastructure", description: "Disrupting access to data needed by AI agents for functionality." }
+            {
+                id: "LLM03",
+                title: "Training Data Poisoning",
+                description: "Manipulating retrieval data or fine-tuning sets to compromise model behavior.",
+                analogy: "Subtly changing a textbook so that students learn 2+2=5 without realizing it's wrong.",
+                rationale: "Poisoned data in RAG pipelines can force agents to leak enterprise secrets or provide malicious advice.",
+                source: "OWASP Top 10 for LLM Applications",
+                sourceUrl: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+            }
         ]
     },
     {
         id: 1,
         name: "Layer 1: Foundation Models",
-        description: "The core LLMs and base models providing the fundamental intelligence.",
+        description: "Base LLMs and specialized models providing the core intelligence layer.",
         icon: Cpu,
         color: "text-slate-400",
         threats: [
-            { id: "L1-ADV", title: "Adversarial Examples", description: "Inputs crafted to fool the model into making incorrect predictions or behaving unexpectedly." },
-            { id: "L1-STL", title: "Model Stealing", description: "Extracting a copy of the AI model through API queries for IP theft." },
-            { id: "L1-BACK", title: "Backdoor Attacks", description: "Hidden triggers causing the model to behave maliciously when activated." },
-            { id: "L1-INF", title: "Membership Inference", description: "Determining if a specific data point was used to train the model, violating privacy." },
-            { id: "L1-DOS", title: "Model DoS (Sponge Attacks)", description: "Overwhelming models with expensive queries to exhaust computational resources." }
+            {
+                id: "LLM01",
+                title: "Prompt Injection",
+                description: "Manipulating model behavior via crafted inputs to bypass safety guardrails.",
+                analogy: "Telling a security guard 'The boss said it's okay for me to go in' even when you don't have a badge.",
+                rationale: "Direct and indirect injections (LLM01) can override the system prompt, leading to unauthorized data access.",
+                source: "OWASP Top 10 for LLM Applications",
+                sourceUrl: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+            },
+            {
+                id: "LLM10",
+                title: "Model Theft",
+                description: "Unauthorized access or exfiltration of proprietary model weights and architectures.",
+                analogy: "Breaking into a secret lab to steal the blueprint for a revolutionary new invention.",
+                rationale: "Exfiltration of model parameters (LLM10) allows attackers to perform offline adversarial testing.",
+                source: "OWASP Top 10 for LLM Applications",
+                sourceUrl: "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+            }
         ]
     }
 ];
@@ -201,6 +248,7 @@ export function MaestroExplainer() {
     const [activeView, setActiveView] = useState<'theory' | 'audit' | 'mitigation' | 'patterns'>('theory');
     const [selectedLayerId, setSelectedLayerId] = useState<number | null>(7);
     const [isScanning, setIsScanning] = useState(false);
+    const [briefData, setBriefData] = useState<any>(null);
 
     useEffect(() => {
         runMaestroAudit();
@@ -241,9 +289,9 @@ export function MaestroExplainer() {
                     <div>
                         <h1 className="text-xl font-bold flex items-center gap-2">
                             <Shield className="w-5 h-5 text-emerald-500" />
-                            MAESTRO Deep Audit
+                            MAESTRO Strategic Audit
                         </h1>
-                        <p className="text-[10px] text-zinc-500 uppercase tracking-widest font-mono">PhD Security Expert / McKinsey Logic</p>
+                        <p className="text-[10px] text-zinc-500 uppercase tracking-widest font-mono">NIST AI RMF 1.0 Aligned / OWASP Verified</p>
                     </div>
                 </div>
 
@@ -313,7 +361,7 @@ export function MaestroExplainer() {
 
                 {/* Vertical Info Panel (Theory View Only) */}
                 {activeView === 'theory' && selectedLayer && (
-                    <div className="w-[450px] border-l border-zinc-800 bg-zinc-900/30 overflow-y-auto animate-in slide-in-from-right-8 duration-300">
+                    <div className="w-[450px] border-l border-zinc-800 bg-zinc-900/40 overflow-y-auto animate-in slide-in-from-right-8 duration-300">
                         <div className="p-8">
                             <div className="flex items-center gap-3 mb-6">
                                 <div className="p-4 rounded-2xl bg-zinc-800 border-2 border-emerald-500/50 shadow-[0_0_20px_rgba(16,185,129,0.2)]">
@@ -330,32 +378,47 @@ export function MaestroExplainer() {
                             </p>
 
                             <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
-                                <AlertTriangle className="w-4 h-4 text-amber-500" /> Granular Threat Landscape
+                                <AlertTriangle className="w-4 h-4 text-amber-500" /> Layer Specific Risks
                             </h3>
                             <div className="space-y-3">
                                 {selectedLayer.threats.map(threat => (
-                                    <div key={threat.id} className="p-4 bg-zinc-800/50 border border-zinc-700 rounded-xl hover:border-zinc-500 transition-all group">
+                                    <button
+                                        key={threat.id}
+                                        onClick={() => setBriefData({
+                                            title: threat.title,
+                                            analogy: threat.analogy,
+                                            rationale: threat.rationale,
+                                            frameworkReference: { label: threat.source, url: threat.sourceUrl }
+                                        })}
+                                        className="w-full text-left p-4 bg-zinc-800/50 border border-zinc-700 rounded-xl hover:border-emerald-500 transition-all group"
+                                    >
                                         <div className="flex justify-between items-start mb-1">
                                             <h4 className="text-sm font-bold text-white group-hover:text-emerald-400 transition-colors">{threat.title}</h4>
                                             <span className="text-[10px] font-mono text-zinc-600">{threat.id}</span>
                                         </div>
                                         <p className="text-xs text-zinc-500 leading-relaxed font-light">{threat.description}</p>
-                                    </div>
+                                    </button>
                                 ))}
                             </div>
 
                             <div className="mt-8 p-6 bg-blue-900/10 border border-blue-500/20 rounded-2xl">
                                 <h4 className="text-xs font-bold text-blue-400 uppercase tracking-widest mb-2 flex items-center gap-2">
-                                    <BarChart3 className="w-4 h-4" /> McKinsey Impact Projection
+                                    <BarChart3 className="w-4 h-4" /> NIST Strategic Indicator
                                 </h4>
                                 <p className="text-xs text-zinc-400 leading-relaxed">
-                                    Disruption at this layer represents a <span className="text-red-400 font-bold">High Blast Radius</span> risk. Failure here typically cascades to higher layers through compromised API registries or goal misalignment.
+                                    Vulnerabilities at this layer impact the <span className="text-blue-400 font-bold">MEASURE</span> and <span className="text-blue-400 font-bold">MANAGE</span> functions of the NIST AI RMF, creating high variance in system output reliability.
                                 </p>
                             </div>
                         </div>
                     </div>
                 )}
             </div>
+
+            <ExpertBrief
+                isOpen={!!briefData}
+                onClose={() => setBriefData(null)}
+                {...briefData!}
+            />
         </div>
     );
 }
@@ -520,8 +583,8 @@ function MitigationView({ toolsByLayer, proposedMitigations }: any) {
     return (
         <div className="max-w-4xl">
             <div className="mb-12">
-                <h2 className="text-4xl font-bold mb-4 text-white">Proposed Strategic Mitigations</h2>
-                <p className="text-zinc-500">PhD-level controls verified against industry benchmarks (NIST/ISO).</p>
+                <h2 className="text-4xl font-bold mb-4 text-white">Strategic Mitigation Controls</h2>
+                <p className="text-zinc-500">Validated remediation strategies aligned with NIST AI RMF Manage function and ISO 42001 standards.</p>
             </div>
 
             <div className="space-y-6">
@@ -566,7 +629,7 @@ function MitigationView({ toolsByLayer, proposedMitigations }: any) {
                                 </div>
                                 <div className="bg-emerald-950/20 p-4 rounded-2xl border border-emerald-500/20">
                                     <div className="text-[10px] font-bold text-emerald-500 uppercase mb-2 flex items-center gap-2">
-                                        <ExternalLink className="w-3 h-3" /> PhD Evidence Rationale
+                                        <ExternalLink className="w-3 h-3" /> Technical Evidence Rationale
                                     </div>
                                     <p className="text-xs text-zinc-300 italic">"{strat.evidence}"</p>
                                 </div>
@@ -615,7 +678,7 @@ function PatternView({ selectedPattern }: any) {
                         <div className="space-y-4 pt-6 border-t border-zinc-800">
                             <div>
                                 <div className="text-[10px] font-bold text-red-400/80 uppercase mb-1 flex items-center gap-2">
-                                    <AlertTriangle className="w-3 h-3" /> Theoretical Threat Profile
+                                    <AlertTriangle className="w-3 h-3" /> Architecture Risk Profile
                                 </div>
                                 <div className="text-xs text-zinc-300 font-medium leading-relaxed italic">"{pattern.threat}"</div>
                             </div>

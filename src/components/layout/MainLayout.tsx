@@ -23,17 +23,14 @@ export function MainLayout() {
 
     const renderContent = () => {
         switch (activeView) {
+            case 'clients': return <Dashboard />;
             case 'stackmap': return <StackMap />;
-            case 'scout':
-                return <AuditScout />;
-            case 'maestro':
-                return <MaestroExplainer />;
-            case 'assess':
-                return <MaturityAssessment />;
+            case 'maestro': return <MaestroExplainer />;
+            case 'scout': return <AuditScout />;
+            case 'assess': return <MaturityAssessment />;
             case 'roadmap': return <RoadmapGenerator />;
             case 'studio': return <ContentStudio />;
             case 'aiops': return <AIOpsDashboard />;
-            case 'clients': return <Dashboard />;
             case 'settings': return <SettingsPanel />;
             default: return <Dashboard />;
         }
@@ -124,42 +121,58 @@ export function MainLayout() {
                     </button>
                 </div>
 
-                <nav className="flex-1 py-6 space-y-2 px-2">
+                <nav className="flex-1 py-6 space-y-1 px-2">
                     <NavItem
-                        icon={Users} label="Clients & Projects"
+                        icon={Users} label="Portfolio"
                         active={activeView === 'clients'} collapsed={!sidebarOpen}
                         onClick={() => setActiveView('clients')}
                     />
-                    <div className="my-4 border-t border-zinc-800" />
+
+                    <div className="my-4 px-3 flex items-center gap-2">
+                        <div className="h-px flex-1 bg-zinc-800" />
+                        {!sidebarOpen ? null : <span className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest whitespace-nowrap">The Journey</span>}
+                        <div className="h-px flex-1 bg-zinc-800" />
+                    </div>
 
                     <NavItem
-                        icon={LayoutDashboard} label="Phase 1: Stack Discovery"
+                        icon={LayoutDashboard} label="1. Discovery"
                         active={activeView === 'stackmap'} collapsed={!sidebarOpen}
                         onClick={() => setActiveView('stackmap')}
                     />
                     <NavItem
-                        icon={Search} label="Audit Scout"
+                        icon={LayoutDashboard} label="2. Architecture"
+                        active={activeView === 'maestro'} collapsed={!sidebarOpen}
+                        onClick={() => setActiveView('maestro')}
+                    />
+                    <NavItem
+                        icon={Search} label="3. Deep Audit"
                         active={activeView === 'scout'} collapsed={!sidebarOpen}
                         onClick={() => setActiveView('scout')}
                     />
                     <NavItem
-                        icon={BarChart3} label="Assess Maturity"
+                        icon={BarChart3} label="4. Strategy"
                         active={activeView === 'assess'} collapsed={!sidebarOpen}
                         onClick={() => setActiveView('assess')}
                     />
                     <NavItem
-                        icon={LayoutDashboard} label="Phase 2: Remediation Plan"
+                        icon={Activity} label="5. Roadmap"
                         active={activeView === 'roadmap'} collapsed={!sidebarOpen}
                         onClick={() => setActiveView('roadmap')}
                     />
+
+                    <div className="my-4 px-3 flex items-center gap-2">
+                        <div className="h-px flex-1 bg-zinc-800" />
+                        {!sidebarOpen ? null : <span className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest whitespace-nowrap">Governance</span>}
+                        <div className="h-px flex-1 bg-zinc-800" />
+                    </div>
+
                     <NavItem
-                        icon={PenTool} label="Phase 3: Content Studio"
+                        icon={PenTool} label="Studio"
                         active={activeView === 'studio'} collapsed={!sidebarOpen}
                         onClick={() => setActiveView('studio')}
                     />
-                    <div className="my-4 border-t border-zinc-800" />
                     <NavItem
-                        icon={Activity} label="Phase 4: AIOps Control"
+                        icon={Activity} label="AIOps Control"
                         active={activeView === 'aiops'} collapsed={!sidebarOpen}
                         onClick={() => setActiveView('aiops')}
                     />

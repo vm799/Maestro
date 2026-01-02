@@ -102,7 +102,7 @@ export function RoadmapGenerator() {
                 scale: 'security',
                 deliverable: {
                     type: 'Patch Report',
-                    markdown: `# MAESTRO Framework Security Patching\n\n**Objective:** Remediate PhD-level vulnerabilities detected in the 7-layer audit.\n\n## Vulnerabilities Addressed\n${maestroAudit.vulnerabilities.map(v => `- [ ] **${v.id}**: ${v.description} (Severity: ${v.severity.toUpperCase()})`).join('\n')}`
+                    markdown: `# MAESTRO Framework Security Patching\n\n**Objective:** Remediate architectural vulnerabilities detected in the 7-layer audit.\n\n## Vulnerabilities Addressed\n${maestroAudit.vulnerabilities.map(v => `- [ ] **${v.id}**: ${v.description} (Severity: ${v.severity.toUpperCase()})`).join('\n')}`
                 }
             });
         }
@@ -123,51 +123,50 @@ export function RoadmapGenerator() {
         return items;
     };
 
-    const phases = [
-        {
-            title: `Phase 1: ${priorityArea === 'governance' ? 'Governance Lockdown' : 'Literacy Uplift'}`,
+    {
+        title: `Phase 1: ${priorityArea === 'governance' ? 'NIST GOVERN Alignment' : 'Literacy Enrichment'}`,
             color: priorityArea === 'governance' ? 'from-amber-400 to-orange-500' : 'from-blue-400 to-indigo-500',
-            duration: 'Weeks 1-4',
-            description: priorityArea === 'governance'
-                ? `Critical: Governance gap of ${governanceGap.toFixed(1)} points. Lock down policies first.`
-                : `Critical: Literacy gap of ${literacyGap.toFixed(1)} points. Upskill the team first.`,
-            items: priorityArea === 'governance' ? buildGovernanceItems() : buildLiteracyItems()
-        },
-        {
-            title: 'Technical Hardening (MAESTRO)',
+                duration: 'Weeks 1-4',
+                    description: priorityArea === 'governance'
+                        ? `Focus: Establishing the GOVERN function per NIST AI RMF 1.0 to manage institutional risk.`
+                        : `Focus: Addressing the literacy gap to ensure safe and responsible use of AI assets.`,
+                        items: priorityArea === 'governance' ? buildGovernanceItems() : buildLiteracyItems()
+    },
+    {
+        title: 'Technical Hardening (MAESTRO)',
             color: 'from-red-400 to-pink-500',
-            duration: 'Urgent / Concurrent',
-            description: 'Direct remediation of detected MAESTRO architectural vulnerabilities.',
-            items: buildMaestroItems()
-        },
-        {
-            title: `Phase 2: ${priorityArea === 'governance' ? 'Literacy Uplift' : 'Governance Lockdown'}`,
+                duration: 'Urgent / Concurrent',
+                    description: 'Direct remediation of detected MAESTRO architectural vulnerabilities and OWASP Top 10 risks.',
+                        items: buildMaestroItems()
+    },
+    {
+        title: `Phase 2: ${priorityArea === 'governance' ? 'Literacy Uplift' : 'Governance Lockdown'}`,
             color: priorityArea === 'governance' ? 'from-blue-400 to-indigo-500' : 'from-amber-400 to-orange-500',
-            duration: 'Weeks 5-8',
-            description: priorityArea === 'governance'
-                ? `Secondary: Literacy gap of ${literacyGap.toFixed(1)} points. Train the workforce.`
-                : `Secondary: Governance gap of ${governanceGap.toFixed(1)} points. Establish controls.`,
-            items: priorityArea === 'governance' ? buildLiteracyItems() : buildGovernanceItems()
-        },
-        {
-            title: 'Phase 3: Sustained Excellence',
+                duration: 'Weeks 5-8',
+                    description: priorityArea === 'governance'
+                        ? `Secondary: Literacy gap of ${literacyGap.toFixed(1)} points. Train the workforce.`
+                        : `Secondary: Governance gap of ${governanceGap.toFixed(1)} points. Establish controls.`,
+                        items: priorityArea === 'governance' ? buildLiteracyItems() : buildGovernanceItems()
+    },
+    {
+        title: 'Phase 3: Sustained Excellence',
             color: 'from-emerald-400 to-teal-500',
-            duration: 'Ongoing',
-            description: 'Maintain 4.0 maturity across all scales with continuous monitoring.',
-            items: [
-                {
-                    title: 'Quarterly Maturity Re-Assessment',
-                    type: 'ops',
-                    tools: ['Maestro Platform'],
-                    est: 'Quarterly',
-                    icon: Target,
-                    deliverable: {
-                        type: 'Process Doc',
-                        markdown: `# Quarterly Review Process\n\n1. Re-run the Maturity Assessment\n2. Compare scores to previous quarter\n3. Identify regression areas\n4. Update Roadmap accordingly`
-                    }
-                }
-            ]
-        }
+                duration: 'Ongoing',
+                    description: 'Maintain 4.0 maturity across all scales with continuous monitoring.',
+                        items: [
+                            {
+                                title: 'Quarterly Maturity Re-Assessment',
+                                type: 'ops',
+                                tools: ['Maestro Platform'],
+                                est: 'Quarterly',
+                                icon: Target,
+                                deliverable: {
+                                    type: 'Process Doc',
+                                    markdown: `# Quarterly Review Process\n\n1. Re-run the Maturity Assessment\n2. Compare scores to previous quarter\n3. Identify regression areas\n4. Update Roadmap accordingly`
+                                }
+                            }
+                        ]
+    }
     ].filter(p => p.items.length > 0 || p.title.includes('Sustained'));
 
     return (
