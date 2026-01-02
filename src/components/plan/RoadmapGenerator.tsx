@@ -123,50 +123,52 @@ export function RoadmapGenerator() {
         return items;
     };
 
-    {
-        title: `Phase 1: ${priorityArea === 'governance' ? 'NIST GOVERN Alignment' : 'Literacy Enrichment'}`,
+    const phases = [
+        {
+            title: `Phase 1: ${priorityArea === 'governance' ? 'NIST GOVERN Alignment' : 'Literacy Enrichment'}`,
             color: priorityArea === 'governance' ? 'from-amber-400 to-orange-500' : 'from-blue-400 to-indigo-500',
-                duration: 'Weeks 1-4',
-                    description: priorityArea === 'governance'
-                        ? `Focus: Establishing the GOVERN function per NIST AI RMF 1.0 to manage institutional risk.`
-                        : `Focus: Addressing the literacy gap to ensure safe and responsible use of AI assets.`,
-                        items: priorityArea === 'governance' ? buildGovernanceItems() : buildLiteracyItems()
-    },
-    {
-        title: 'Technical Hardening (MAESTRO)',
+            duration: 'Weeks 1-4',
+            description: priorityArea === 'governance'
+                ? `Focus: Establishing the GOVERN function per NIST AI RMF 1.0 to manage institutional risk.`
+                : `Focus: Addressing the literacy gap to ensure safe and responsible use of AI assets.`,
+            items: priorityArea === 'governance' ? buildGovernanceItems() : buildLiteracyItems()
+        },
+        {
+            title: 'Technical Hardening (MAESTRO)',
             color: 'from-red-400 to-pink-500',
-                duration: 'Urgent / Concurrent',
-                    description: 'Direct remediation of detected MAESTRO architectural vulnerabilities and OWASP Top 10 risks.',
-                        items: buildMaestroItems()
-    },
-    {
-        title: `Phase 2: ${priorityArea === 'governance' ? 'Literacy Uplift' : 'Governance Lockdown'}`,
+            duration: 'Urgent / Concurrent',
+            description: 'Direct remediation of detected MAESTRO architectural vulnerabilities and OWASP Top 10 risks.',
+            items: buildMaestroItems()
+        },
+        {
+            title: `Phase 2: ${priorityArea === 'governance' ? 'Literacy Uplift' : 'Governance Lockdown'}`,
             color: priorityArea === 'governance' ? 'from-blue-400 to-indigo-500' : 'from-amber-400 to-orange-500',
-                duration: 'Weeks 5-8',
-                    description: priorityArea === 'governance'
-                        ? `Secondary: Literacy gap of ${literacyGap.toFixed(1)} points. Train the workforce.`
-                        : `Secondary: Governance gap of ${governanceGap.toFixed(1)} points. Establish controls.`,
-                        items: priorityArea === 'governance' ? buildLiteracyItems() : buildGovernanceItems()
-    },
-    {
-        title: 'Phase 3: Sustained Excellence',
+            duration: 'Weeks 5-8',
+            description: priorityArea === 'governance'
+                ? `Secondary: Literacy gap of ${literacyGap.toFixed(1)} points. Train the workforce.`
+                : `Secondary: Governance gap of ${governanceGap.toFixed(1)} points. Establish controls.`,
+            items: priorityArea === 'governance' ? buildLiteracyItems() : buildGovernanceItems()
+        },
+        {
+            title: 'Phase 3: Sustained Excellence',
             color: 'from-emerald-400 to-teal-500',
-                duration: 'Ongoing',
-                    description: 'Maintain 4.0 maturity across all scales with continuous monitoring.',
-                        items: [
-                            {
-                                title: 'Quarterly Maturity Re-Assessment',
-                                type: 'ops',
-                                tools: ['Maestro Platform'],
-                                est: 'Quarterly',
-                                icon: Target,
-                                deliverable: {
-                                    type: 'Process Doc',
-                                    markdown: `# Quarterly Review Process\n\n1. Re-run the Maturity Assessment\n2. Compare scores to previous quarter\n3. Identify regression areas\n4. Update Roadmap accordingly`
-                                }
-                            }
-                        ]
-    }
+            duration: 'Ongoing',
+            description: 'Maintain 4.0 maturity across all scales with continuous monitoring.',
+            items: [
+                {
+                    title: 'Quarterly Maturity Re-Assessment',
+                    type: 'ops',
+                    tools: ['Maestro Platform'],
+                    est: '2 days',
+                    icon: Shield,
+                    scale: 'governance',
+                    deliverable: {
+                        type: 'Audit Schedule',
+                        markdown: `# AI Governance Maintenance\n\n**Frequency:** Every 90 days\n\n## Scope\n- Re-scan all shadow AI endpoints\n- Verify literacy certificate compliance\n- Update MAESTRO threat model against latest NIST/OWASP releases.`
+                    }
+                }
+            ]
+        }
     ].filter(p => p.items.length > 0 || p.title.includes('Sustained'));
 
     return (
