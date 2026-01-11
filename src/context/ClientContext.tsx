@@ -66,39 +66,61 @@ export interface Mitigation {
 
 const MAESTRO_LAYERS: MaestroLayer[] = [
     {
-        id: 7, name: "Layer 7: Agent Ecosystem", description: "The interaction plane where autonomous agents interface with users, external APIs, and business applications.", icon: 'Globe', color: "text-blue-400",
+        id: 7, name: "Layer 7: Agent Ecosystem", description: "Interaction plane where autonomous agents interface with users, external APIs, and business apps.", icon: 'Globe', color: "text-blue-400",
         threats: [
-            { id: "LLM08", title: "Excessive Agency", description: "Granting agents overly broad permissions or autonomy, leading to unintended actions.", analogy: "Robot helper with house keys.", rationale: "Autonomy without HITL increases risk.", source: "OWASP LLM", sourceUrl: "#" },
-            { id: "LLM09", title: "Overreliance", description: "Uncritical acceptance of agent outputs.", analogy: "Following GPS into a lake.", rationale: "Organizational dependency on stochastic output.", source: "OWASP LLM", sourceUrl: "#" }
+            { id: "LLM08", title: "Excessive Agency", description: "Granting agents overly broad permissions.", analogy: "Robot helper with house keys.", rationale: "Autonomy without HITL increases risk.", source: "OWASP LLM", sourceUrl: "#" }
         ]
     },
-    {
-        id: 6, name: "Layer 6: Security & Compliance", description: "The governance framework (Govern Function) ensuring alignment.", icon: 'Lock', color: "text-purple-400",
-        threats: [{ id: "NIST-GOV", title: "Governance Deficit", description: "Failure to establish risk management culture.", analogy: "Skyscraper without safety inspections.", rationale: "NIST AI RMF non-adherence.", source: "NIST AI RMF", sourceUrl: "#" }]
-    },
-    {
-        id: 5, name: "Layer 5: Evaluation & Observability", description: "The MEASURE function (NIST) for tracking performance.", icon: 'Eye', color: "text-emerald-400",
-        threats: [{ id: "LLM07", title: "Insecure Plugin Design", description: "Vulnerabilities in extensions or monitoring tools.", analogy: "Knock-off security camera.", rationale: "Tools requirement elevated privileges.", source: "OWASP LLM", sourceUrl: "#" }]
-    },
-    {
-        id: 4, name: "Layer 4: Deployment & Infrastructure", description: "The orchestration and compute environment (Deployment).", icon: 'Box', color: "text-amber-400",
-        threats: [{ id: "LLM04", title: "Model Denial of Service", description: "Resource exhaustion attacks.", analogy: "Prank callers at pizza shop.", rationale: "Stochastic models are expensive.", source: "OWASP LLM", sourceUrl: "#" }]
-    },
-    {
-        id: 3, name: "Layer 3: Agent Frameworks", description: "Development toolkits (LangChain, AutoGen).", icon: 'Activity', color: "text-indigo-400",
-        threats: [{ id: "LLM05", title: "Supply Chain Vulnerabilities", description: "Risks from third-party libraries.", analogy: "Recalled ingredient in recipe.", rationale: "Opaque dependencies.", source: "OWASP LLM", sourceUrl: "#" }]
-    },
-    {
-        id: 2, name: "Layer 2: Data Operations", description: "Vector storage and RAG pipelines (MAP function).", icon: 'Database', color: "text-rose-400",
-        threats: [{ id: "LLM03", title: "Training Data Poisoning", description: "Manipulating retrieval data.", analogy: "Changing textbook subtly.", rationale: "Secret leakage risk.", source: "OWASP LLM", sourceUrl: "#" }]
-    },
-    {
-        id: 1, name: "Layer 1: Foundation Models", description: "Base LLMs and specialized models.", icon: 'Cpu', color: "text-slate-400",
-        threats: [
-            { id: "LLM01", title: "Prompt Injection", description: "Manipulating model behavior via crafted inputs.", analogy: "Security guard social engineering.", rationale: "Safety guardrail bypass.", source: "OWASP LLM", sourceUrl: "#" },
-            { id: "LLM10", title: "Model Theft", description: "Unauthorized access to weights.", analogy: "Stealing secret lab blueprints.", rationale: "Adversarial testing enabled.", source: "OWASP LLM", sourceUrl: "#" }
-        ]
-    }
+    { id: 6, name: "Layer 6: Security & Compliance", description: "Governance framework (Govern Function).", icon: 'Shield', color: "text-purple-400", threats: [] },
+    { id: 5, name: "Layer 5: Evaluation & Observability", description: "MEASURE function (NIST) for tracking performance.", icon: 'Activity', color: "text-emerald-400", threats: [] },
+    { id: 4, name: "Layer 4: Deployment & Infra", description: "Orchestration and compute environment.", icon: 'Cloud', color: "text-amber-400", threats: [] },
+    { id: 3, name: "Layer 3: Agent Frameworks", description: "Development toolkits (LangChain, AutoGen).", icon: 'Code', color: "text-indigo-400", threats: [] },
+    { id: 2, name: "Layer 2: Data Operations", description: "Vector storage and RAG pipelines.", icon: 'Database', color: "text-rose-400", threats: [] },
+    { id: 1, name: "Layer 1: Foundation Models", description: "Base LLMs and specialized models.", icon: 'Cpu', color: "text-slate-400", threats: [] }
+];
+
+const COMPONENT_LIBRARY: ToolNode[] = [
+    // Layer 1: Foundation Models
+    { id: 'openai', name: 'OpenAI GPT-4o', category: 'ai', icon: 'Share2', layer: 1, risky: false },
+    { id: 'anthropic', name: 'Claude 3.5 Sonnet', category: 'ai', icon: 'Share2', layer: 1, risky: false },
+    { id: 'google', name: 'Gemini 1.5 Pro', category: 'ai', icon: 'Share2', layer: 1, risky: false },
+    { id: 'llama', name: 'Meta Llama 3.1 (Self-Hosted)', category: 'ai', icon: 'Code', layer: 1, risky: true },
+    { id: 'mistral', name: 'Mistral Large', category: 'ai', icon: 'Share2', layer: 1, risky: false },
+
+    // Layer 2: Data Operations
+    { id: 'pinecone', name: 'Pinecone Vector DB', category: 'ai', icon: 'Database', layer: 2, risky: false },
+    { id: 'weaviate', name: 'Weaviate Cloud', category: 'ai', icon: 'Database', layer: 2, risky: false },
+    { id: 'mongodb', name: 'MongoDB Atlas (Vector)', category: 'crm', icon: 'Database', layer: 2, risky: false },
+    { id: 'databricks', name: 'Databricks Mosaic AI', category: 'ai', icon: 'Database', layer: 2, risky: false },
+    { id: 'snowflake', name: 'Snowflake Cortex', category: 'ai', icon: 'Database', layer: 2, risky: false },
+
+    // Layer 3: Agent Frameworks
+    { id: 'langchain', name: 'LangChain', category: 'ai', icon: 'Code', layer: 3, risky: false },
+    { id: 'llamaindex', name: 'LlamaIndex', category: 'ai', icon: 'Code', layer: 3, risky: false },
+    { id: 'autogen', name: 'Microsoft AutoGen', category: 'ai', icon: 'Code', layer: 3, risky: false },
+    { id: 'crewai', name: 'CrewAI', category: 'ai', icon: 'Code', layer: 3, risky: false },
+
+    // Layer 4: Deployment & Infrastructure
+    { id: 'aws-bedrock', name: 'AWS Bedrock', category: 'hosting', icon: 'Cloud', layer: 4, risky: false },
+    { id: 'azure-ai', name: 'Azure AI Studio', category: 'hosting', icon: 'Cloud', layer: 4, risky: false },
+    { id: 'vertex-ai', name: 'GCP Vertex AI', category: 'hosting', icon: 'Cloud', layer: 4, risky: false },
+    { id: 'hf-endpoints', name: 'Hugging Face Endpoints', category: 'hosting', icon: 'Cloud', layer: 4, risky: true },
+
+    // Layer 5: Evaluation & Observability
+    { id: 'langsmith', name: 'LangSmith', category: 'ai', icon: 'Activity', layer: 5, risky: false },
+    { id: 'arize', name: 'Arize Phoenix', category: 'ai', icon: 'Activity', layer: 5, risky: false },
+    { id: 'wandb', name: 'Weights & Biases', category: 'ai', icon: 'Activity', layer: 5, risky: false },
+
+    // Layer 6: Security & Compliance
+    { id: 'prompt-security', name: 'Prompt Security', category: 'ai', icon: 'Shield', layer: 6, risky: false },
+    { id: 'hiddenlayer', name: 'HiddenLayer', category: 'ai', icon: 'Shield', layer: 6, risky: false },
+    { id: 'lakera', name: 'Lakera Guard', category: 'ai', icon: 'Shield', layer: 6, risky: false },
+
+    // Layer 7: Agent Ecosystem
+    { id: 'salesforce', name: 'Salesforce Agentforce', category: 'crm', icon: 'Database', layer: 7, risky: false },
+    { id: 'zapier', name: 'Zapier Central', category: 'email', icon: 'Share2', layer: 7, risky: false },
+    { id: 'slack-ai', name: 'Slack AI Agents', category: 'comm', icon: 'MessageSquare', layer: 7, risky: false },
+    { id: 'hubspot', name: 'HubSpot Breeze', category: 'crm', icon: 'Database', layer: 7, risky: false },
 ];
 
 const AGENTIC_PATTERNS: AgenticPattern[] = [
@@ -189,9 +211,10 @@ export interface ClientState {
     updateCostBasis: (basis: Partial<CostBasis>) => void;
     setMaturityScores: (scores: { literacy: number; governance: number; adoption?: number }) => void;
     toggleMitigation: (id: string) => void;
-    setMaestroAudit: (results: Partial<MaestroAuditResults>) => void;
+    updateMaestroAudit: (results: Partial<MaestroAuditResults>) => void;
     runMaestroAudit: () => void;
     updateClientIdentity: (identity: { name: string; industry: string; region: string }) => void;
+    ingestTranscript: (text: string) => void;
 }
 
 // --- Context ---
@@ -224,18 +247,9 @@ export function ClientProvider({ children }: { children: ReactNode }) {
         agenda: []
     }, [isOnboarding]);
 
-    const liveTechInventory = useMemo<ToolNode[]>(() => isOnboarding ? [
-        { id: 'openai', name: 'OpenAI GPT-4o', category: 'ai', icon: 'Share2', layer: 1, risky: false },
-        { id: 'claude', name: 'Claude 3.5 Sonnet', category: 'ai', icon: 'Share2', layer: 1, risky: false },
-        { id: 'llama', name: 'Llama 3 (Self-Hosted)', category: 'ai', icon: 'Code', layer: 1, risky: true },
-        { id: 'pinecone', name: 'Pinecone Vector DB', category: 'ai', icon: 'Database', layer: 2, risky: false },
-        { id: 'mongodb', name: 'MongoDB Atlas', category: 'crm', icon: 'Database', layer: 2, risky: false },
-        { id: 'langchain', name: 'LangChain', category: 'ai', icon: 'Code', layer: 3, risky: false },
-        { id: 'aws', name: 'AWS Bedrock', category: 'hosting', icon: 'Cloud', layer: 4, risky: false },
-        { id: 'salesforce', name: 'Salesforce Agentforce', category: 'crm', icon: 'Database', layer: 7, risky: false },
-    ] : [], [isOnboarding]);
+    const liveTechInventory = useMemo<ToolNode[]>(() => COMPONENT_LIBRARY, []);
 
-    const [meetingPulse] = useState<string[]>([
+    const [meetingPulse, setMeetingPulse] = useState<string[]>([
         "CTO mentioned 'Shadow AI' in marketing department (Canva/Midjourney)",
         "Internal DB 'Atlas-Core' exposed via unencrypted Python scripts",
         "Agents are executing local shell commands without sandboxing"
@@ -321,9 +335,6 @@ export function ClientProvider({ children }: { children: ReactNode }) {
         });
     };
 
-    const setMaestroAudit = (results: Partial<MaestroAuditResults>) => {
-        setMaestroAuditState(prev => ({ ...prev, ...results }));
-    };
 
     const toggleMitigation = (id: string) => {
         setMaestroAuditState(prev => ({
@@ -425,13 +436,18 @@ export function ClientProvider({ children }: { children: ReactNode }) {
             updateScores,
             updateCostBasis: (basis) => setCostBasis(prev => ({ ...prev, ...basis })),
             setMaturityScores,
-            setMaestroAudit,
+            updateMaestroAudit: (results: Partial<MaestroAuditResults>) => {
+                setMaestroAuditState(prev => ({ ...prev, ...results }));
+            },
             runMaestroAudit,
             toggleMitigation,
             updateClientIdentity: (id) => {
                 setCompanyName(id.name);
                 setIndustry(id.industry);
                 setRegion(id.region);
+            },
+            ingestTranscript: (text) => {
+                setMeetingPulse(prev => [text, ...prev].slice(0, 10));
             }
         }}>
             {children}

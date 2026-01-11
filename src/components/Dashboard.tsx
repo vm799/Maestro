@@ -92,9 +92,15 @@ export function Dashboard() {
                     <div className="col-span-full text-center py-32 border-2 border-dashed border-zinc-800 rounded-3xl bg-zinc-900/20 backdrop-blur-sm">
                         <Activity className="w-16 h-16 text-zinc-700 mx-auto mb-6 animate-pulse" />
                         <h3 className="text-2xl font-bold text-zinc-400 mb-3">Waiting for Meeting Sync...</h3>
-                        <p className="text-zinc-600 max-w-sm mx-auto text-sm leading-relaxed">
+                        <p className="text-zinc-600 max-w-sm mx-auto text-sm leading-relaxed mb-8">
                             No active engagements detected. Connect the <span className="text-primary font-bold">Maestro MeetingParser</span> or CRM hooks to initialize real-time data orchestration.
                         </p>
+                        <button
+                            onClick={() => setShowOnboarding(true)}
+                            className="bg-zinc-800 text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 hover:bg-zinc-700 transition-all mx-auto border border-zinc-700 hover:border-primary/50"
+                        >
+                            <Plus className="w-4 h-4 text-primary" /> Create Manual Engagement
+                        </button>
                     </div>
                 )}
             </div>

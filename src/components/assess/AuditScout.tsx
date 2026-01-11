@@ -56,7 +56,7 @@ export function AuditScout() {
     const {
         identifiedRisks, frictionCost, costBasis, updateCostBasis,
         shieldScore, spearScore, updateScores, isOnboarding,
-        meetingPulse
+        meetingPulse, ingestTranscript
     } = useClient();
 
     const [messages, setMessages] = useState<Message[]>([]);
@@ -210,8 +210,9 @@ export function AuditScout() {
 
     return (
         <div className="flex h-full bg-zinc-50 dark:bg-zinc-950 p-8 gap-8 overflow-hidden">
-            {/* Live Extraction Stream (Phase 2) */}
-            <div className="w-72 flex flex-col gap-4 shrink-0">
+            {/* Sidebar: Extraction & Ingestion */}
+            <div className="w-72 flex flex-col gap-4 shrink-0 overflow-y-auto pr-2">
+                {/* Live Extraction Stream */}
                 <div className="p-4 bg-zinc-900 border border-zinc-800 rounded-xl">
                     <h4 className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-4 flex items-center gap-2">
                         <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
@@ -227,6 +228,31 @@ export function AuditScout() {
                             </div>
                         ))}
                     </div>
+                </div>
+
+                {/* Manual Meeting Ingestion */}
+                <div className="p-4 bg-zinc-900 border border-zinc-800 rounded-xl space-y-4">
+                    <h4 className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest flex items-center gap-2">
+                        <Zap className="w-3 h-3 text-amber-500" />
+                        Manual Input Override
+                    </h4>
+                    <textarea
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter' && !e.shiftKey) {
+                                e.preventDefault();
+                                const target = e.target as HTMLTextAreaElement;
+                                if (target.value.trim()) {
+                                    ingestTranscript(target.value.trim());
+                                    target.value = "";
+                                }
+                            }
+                        }}
+                        className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-[11px] text-zinc-300 placeholder:text-zinc-700 outline-none focus:border-amber-500/50 min-h-[100px] resize-none"
+                        placeholder="Paste meeting notes... (Enter to Ingest)"
+                    />
+                    <p className="text-[9px] text-zinc-500 italic">
+                        Bypass automated sync by manually feeding meeting insights or incident logs into the cascade.
+                    </p>
                 </div>
 
                 <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-xl">
@@ -298,27 +324,26 @@ export function AuditScout() {
                         >
                             <Send className="w-4 h-4 ml-0.5" />
                         </button>
-                        {step === 'complete' && (
-                            <button
-                                onClick={() => window.dispatchEvent(new CustomEvent('navigate', { detail: 'roadmap' }))}
-                                className="w-full mt-6 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-bold flex items-center justify-center gap-2 animate-pulse hover:scale-105 transition-transform"
-                            >
-                                <CheckCircle className="w-4 h-4" /> View Remediation Plan
-                            </button>
-                        )}        </form>
+                    </form>
+                    {step === 'complete' && (
+                        <button
+                            onClick={() => window.dispatchEvent(new CustomEvent('navigate', { detail: 'roadmap' }))}
+                            className="w-full mt-6 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-bold flex items-center justify-center gap-2 animate-pulse hover:scale-105 transition-transform"
+                        >
+                            <CheckCircle className="w-4 h-4" /> View Remediation Plan
+                        </button>
+                    )}
                 </div>
             </div>
 
             {/* Live "Shield & Spear" Analysis */}
             <div className="w-full lg:w-80 space-y-6 shrink-0">
-
                 {/* Cost Analysis Card */}
                 <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
                     <h4 className="font-bold text-sm mb-4 flex items-center justify-between text-zinc-100">
                         <span className="flex items-center gap-2"><HelpCircle className="w-4 h-4 text-primary" /> Cost Analysis</span>
                     </h4>
 
-                    {/* The "Proven" Formula */}
                     <div className="space-y-3 text-xs">
                         <div className="p-3 bg-zinc-900/50 rounded-lg space-y-2 border border-zinc-800">
                             <div className="flex justify-between items-center text-zinc-400">
@@ -377,7 +402,6 @@ export function AuditScout() {
                         <div className={`h-full ${spearScore < 50 ? "bg-amber-500" : "bg-blue-500"} transition-all duration-1000`} style={{ width: `${spearScore}%` }} />
                     </div>
                 </div>
-
             </div>
         </div>
     );

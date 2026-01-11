@@ -1,10 +1,10 @@
 import React, { useState, useRef } from 'react';
-import { Share2, MessageSquare, Database, ArrowRight, X, Cloud, Code, Server } from 'lucide-react';
+import { Share2, MessageSquare, Database, ArrowRight, X, Cloud, Code, Server, Shield, Activity, Globe } from 'lucide-react';
 import { useClient, type ToolNode } from '../../context/ClientContext';
 
 // Icon mapping for dynamic tools
 const ICON_MAP: Record<string, any> = {
-    Share2, MessageSquare, Database, ArrowRight, X, Cloud, Code, Server
+    Share2, MessageSquare, Database, ArrowRight, X, Cloud, Code, Server, Shield, Activity, Globe
 };
 
 export function StackMap() {
