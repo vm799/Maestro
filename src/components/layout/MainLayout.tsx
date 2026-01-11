@@ -114,8 +114,8 @@ export function MainLayout() {
     return (
         <div className="flex h-screen w-full bg-zinc-950 text-white overflow-hidden flex-col">
             {isOnboarding && (
-                <div className="bg-blue-600 text-white py-1 px-4 text-[10px] font-bold tracking-[0.2em] uppercase flex justify-between items-center z-[100] animate-pulse">
-                    <span>DEMO MODE ACTIVE • SAMPLE DATA SHOWN</span>
+                <div className="bg-blue-600 text-white py-1 px-4 text-[10px] font-bold tracking-[0.2em] uppercase flex justify-between items-center z-[100] border-b border-blue-400/30 shadow-lg">
+                    <span>MAESTRO AUDIT SANDBOX • DYNAMIC DATA ACTIVE</span>
                     <button
                         onClick={() => toggleOnboarding(false)}
                         className="hover:underline bg-white/10 px-2 py-0.5 rounded"

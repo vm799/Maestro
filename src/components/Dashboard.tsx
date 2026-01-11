@@ -14,7 +14,7 @@ export function Dashboard() {
 
     // Inject sample data ONLY if in onboarding mode
     const displayClients = isOnboarding
-        ? [{ id: 'sample-a', name: "Sample Client A (Sandbox)", industry: "eCommerce", phase: "Discovery", status: "Demo" }, ...clients]
+        ? [{ id: 'sample-a', name: "Sample Client A (Sandbox)", industry: "eCommerce", phase: "Discovery", status: "Sandbox" }, ...clients]
         : clients;
 
     const handleCreateClient = (e: any) => {
