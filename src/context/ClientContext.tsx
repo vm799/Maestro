@@ -4,6 +4,33 @@ import { createContext, useContext, useState, type ReactNode } from 'react';
 
 export type ToolCategory = 'comm' | 'crm' | 'ai' | 'email' | 'hosting' | 'other';
 
+export interface Threat {
+    id: string;
+    title: string;
+    description: string;
+    analogy: string;
+    rationale: string;
+    source: string;
+    sourceUrl: string;
+}
+
+export interface MaestroLayer {
+    id: number;
+    name: string;
+    description: string;
+    icon: any;
+    color: string;
+    threats: Threat[];
+}
+
+export interface AgenticPattern {
+    name: string;
+    description: string;
+    threat: string;
+    mitigation: string;
+    riskLevel: string;
+}
+
 export interface ToolNode {
     id: string;
     name: string;
@@ -32,6 +59,57 @@ export interface Mitigation {
     layerRelevance: number[];
     status: 'proposed' | 'implemented';
 }
+
+// --- Metadata (Decoupled) ---
+
+const MAESTRO_LAYERS: MaestroLayer[] = [
+    {
+        id: 7, name: "Layer 7: Agent Ecosystem", description: "The interaction plane where autonomous agents interface with users, external APIs, and business applications.", icon: 'Globe', color: "text-blue-400",
+        threats: [
+            { id: "LLM08", title: "Excessive Agency", description: "Granting agents overly broad permissions or autonomy, leading to unintended actions.", analogy: "Robot helper with house keys.", rationale: "Autonomy without HITL increases risk.", source: "OWASP LLM", sourceUrl: "#" },
+            { id: "LLM09", title: "Overreliance", description: "Uncritical acceptance of agent outputs.", analogy: "Following GPS into a lake.", rationale: "Organizational dependency on stochastic output.", source: "OWASP LLM", sourceUrl: "#" }
+        ]
+    },
+    {
+        id: 6, name: "Layer 6: Security & Compliance", description: "The governance framework (Govern Function) ensuring alignment.", icon: 'Lock', color: "text-purple-400",
+        threats: [{ id: "NIST-GOV", title: "Governance Deficit", description: "Failure to establish risk management culture.", analogy: "Skyscraper without safety inspections.", rationale: "NIST AI RMF non-adherence.", source: "NIST AI RMF", sourceUrl: "#" }]
+    },
+    {
+        id: 5, name: "Layer 5: Evaluation & Observability", description: "The MEASURE function (NIST) for tracking performance.", icon: 'Eye', color: "text-emerald-400",
+        threats: [{ id: "LLM07", title: "Insecure Plugin Design", description: "Vulnerabilities in extensions or monitoring tools.", analogy: "Knock-off security camera.", rationale: "Tools requirement elevated privileges.", source: "OWASP LLM", sourceUrl: "#" }]
+    },
+    {
+        id: 4, name: "Layer 4: Deployment & Infrastructure", description: "The orchestration and compute environment (Deployment).", icon: 'Box', color: "text-amber-400",
+        threats: [{ id: "LLM04", title: "Model Denial of Service", description: "Resource exhaustion attacks.", analogy: "Prank callers at pizza shop.", rationale: "Stochastic models are expensive.", source: "OWASP LLM", sourceUrl: "#" }]
+    },
+    {
+        id: 3, name: "Layer 3: Agent Frameworks", description: "Development toolkits (LangChain, AutoGen).", icon: 'Activity', color: "text-indigo-400",
+        threats: [{ id: "LLM05", title: "Supply Chain Vulnerabilities", description: "Risks from third-party libraries.", analogy: "Recalled ingredient in recipe.", rationale: "Opaque dependencies.", source: "OWASP LLM", sourceUrl: "#" }]
+    },
+    {
+        id: 2, name: "Layer 2: Data Operations", description: "Vector storage and RAG pipelines (MAP function).", icon: 'Database', color: "text-rose-400",
+        threats: [{ id: "LLM03", title: "Training Data Poisoning", description: "Manipulating retrieval data.", analogy: "Changing textbook subtly.", rationale: "Secret leakage risk.", source: "OWASP LLM", sourceUrl: "#" }]
+    },
+    {
+        id: 1, name: "Layer 1: Foundation Models", description: "Base LLMs and specialized models.", icon: 'Cpu', color: "text-slate-400",
+        threats: [
+            { id: "LLM01", title: "Prompt Injection", description: "Manipulating model behavior via crafted inputs.", analogy: "Security guard social engineering.", rationale: "Safety guardrail bypass.", source: "OWASP LLM", sourceUrl: "#" },
+            { id: "LLM10", title: "Model Theft", description: "Unauthorized access to weights.", analogy: "Stealing secret lab blueprints.", rationale: "Adversarial testing enabled.", source: "OWASP LLM", sourceUrl: "#" }
+        ]
+    }
+];
+
+const AGENTIC_PATTERNS: AgenticPattern[] = [
+    { name: "Single-Agent Pattern", description: "Independent AI agent.", threat: "Goal Manipulation.", mitigation: "Input validation.", riskLevel: "Moderate" },
+    { name: "Multi-Agent Pattern", description: "Collaborative agents.", threat: "Communication Attacks.", mitigation: "Secure protocols.", riskLevel: "High" },
+    { name: "Hierarchical Agent", description: "Layered control.", threat: "Control Compromise.", mitigation: "Strong access controls.", riskLevel: "Critical" }
+];
+
+const MITIGATION_STRATEGIES: Mitigation[] = [
+    { id: "M-ADV", title: "Adversarial Training", description: "Resistance training.", evidence: "35% error reduction.", layerRelevance: [1], status: "proposed" },
+    { id: "M-AUTH", title: "Mutual TLS", description: "SPIFFE identities.", evidence: "99% prevention.", layerRelevance: [3, 4, 7], status: "proposed" },
+    { id: "M-DLP", title: "AI-Aware DLP", description: "PII monitoring.", evidence: "GDPR compliance tool.", layerRelevance: [2, 5], status: "proposed" }
+];
 
 export interface MaestroAuditResults {
     vulnerabilities: Risk[];
@@ -66,6 +144,15 @@ export interface ClientState {
     spearScore: number;  // 0-100 (Culture/Adoption)
     frictionCost: number; // Estimated monthly waste
 
+    // ARCHITECT GLOBAL STATE
+    activeMeetingContext: {
+        meetingId: string | null;
+        phaseId: string | null;
+        agenda: string[];
+    };
+    liveTechInventory: ToolNode[];
+    clientRiskModel: MaestroAuditResults;
+
     // NEW: Onboarding Sandbox
     isOnboarding: boolean;
     toggleOnboarding: (val: boolean) => void;
@@ -81,6 +168,11 @@ export interface ClientState {
     // The "Mess" Findings
     identifiedRisks: Risk[];
     maestroAudit: MaestroAuditResults;
+
+    // DECOUPLED METADATA
+    maestroLayers: MaestroLayer[];
+    agenticPatterns: AgenticPattern[];
+    mitigationLibrary: Mitigation[];
 
     // Actions
     addTool: (tool: ToolNode) => void;
@@ -111,6 +203,23 @@ export function ClientProvider({ children }: { children: ReactNode }) {
     });
     const [shieldScore, setShieldScore] = useState(100); // Start perfect, drop as we find problems
     const [spearScore, setSpearScore] = useState(50);    // Start neutral
+
+    const [activeMeetingContext] = useState({
+        meetingId: "MTG-942",
+        phaseId: "discovery",
+        agenda: ["Stack Discovery", "Risk Profiling", "NIST Alignment"]
+    });
+
+    const [liveTechInventory] = useState<ToolNode[]>([
+        { id: 'openai', name: 'OpenAI GPT-4o', category: 'ai', icon: 'Share2', layer: 1, risky: false },
+        { id: 'claude', name: 'Claude 3.5 Sonnet', category: 'ai', icon: 'Share2', layer: 1, risky: false },
+        { id: 'llama', name: 'Llama 3 (Self-Hosted)', category: 'ai', icon: 'Code', layer: 1, risky: true },
+        { id: 'pinecone', name: 'Pinecone Vector DB', category: 'ai', icon: 'Database', layer: 2, risky: false },
+        { id: 'mongodb', name: 'MongoDB Atlas', category: 'crm', icon: 'Database', layer: 2, risky: false },
+        { id: 'langchain', name: 'LangChain', category: 'ai', icon: 'Code', layer: 3, risky: false },
+        { id: 'aws', name: 'AWS Bedrock', category: 'hosting', icon: 'Cloud', layer: 4, risky: false },
+        { id: 'salesforce', name: 'Salesforce Agentforce', category: 'crm', icon: 'Database', layer: 7, risky: false },
+    ]);
 
     const [isOnboarding, setIsOnboarding] = useState(false);
 
@@ -290,9 +399,15 @@ export function ClientProvider({ children }: { children: ReactNode }) {
             shieldScore,
             spearScore,
             frictionCost,
+            activeMeetingContext,
+            liveTechInventory,
+            clientRiskModel: maestroAudit,
             maturityScores,
             identifiedRisks,
             maestroAudit,
+            maestroLayers: MAESTRO_LAYERS,
+            agenticPatterns: AGENTIC_PATTERNS,
+            mitigationLibrary: MITIGATION_STRATEGIES,
             addTool,
             updateToolPosition,
             removeTool,

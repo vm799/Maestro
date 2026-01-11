@@ -2,33 +2,17 @@ import React, { useState, useRef } from 'react';
 import { Share2, MessageSquare, Database, ArrowRight, X, Cloud, Code, Server } from 'lucide-react';
 import { useClient, type ToolNode } from '../../context/ClientContext';
 
-const AVAILABLE_TOOLS: any[] = [
-    // Layer 1: Foundation Models
-    { id: 'openai', name: 'OpenAI GPT-4o', category: 'ai', icon: Share2, layer: 1 },
-    { id: 'claude', name: 'Claude 3.5 Sonnet', category: 'ai', icon: Share2, layer: 1 },
-    { id: 'llama', name: 'Llama 3 (Self-Hosted)', category: 'ai', icon: Code, layer: 1, risky: true },
-
-    // Layer 2: Data Operations
-    { id: 'pinecone', name: 'Pinecone Vector DB', category: 'ai', icon: Database, layer: 2 },
-    { id: 'mongodb', name: 'MongoDB Atlas', category: 'crm', icon: Database, layer: 2 },
-    { id: 'snowflake', name: 'Snowflake', category: 'crm', icon: Database, layer: 2 },
-
-    // Layer 3: Agent Frameworks
-    { id: 'langchain', name: 'LangChain', category: 'ai', icon: Code, layer: 3 },
-    { id: 'autogen', name: 'Microsoft AutoGen', category: 'ai', icon: MessageSquare, layer: 3 },
-
-    // Layer 4: Infrastructure
-    { id: 'aws', name: 'AWS Bedrock', category: 'hosting', icon: Cloud, layer: 4 },
-    { id: 'azure', name: 'Azure AI Studio', category: 'hosting', icon: Cloud, layer: 4 },
-
-    // Layer 7: Ecosystem / Apps
-    { id: 'salesforce', name: 'Salesforce Agentforce', category: 'crm', icon: Database, layer: 7 },
-    { id: 'slack', name: 'Slack AI', category: 'comm', icon: MessageSquare, layer: 7 },
-    { id: 'teams', name: 'MS Teams', category: 'comm', icon: MessageSquare, layer: 7 },
-];
+// Icon mapping for dynamic tools
+const ICON_MAP: Record<string, any> = {
+    Share2, MessageSquare, Database, ArrowRight, X, Cloud, Code, Server
+};
 
 export function StackMap() {
-    const { stack, connections, addTool: ctxAddTool, updateToolPosition, removeTool: ctxRemoveTool, addConnection, frictionCost } = useClient();
+    const {
+        stack, connections, addTool: ctxAddTool, updateToolPosition,
+        removeTool: ctxRemoveTool, addConnection, frictionCost,
+        liveTechInventory
+    } = useClient();
     const [isDragging, setIsDragging] = useState(false);
     const [draggedToolId, setDraggedToolId] = useState<string | null>(null);
     const [selectedToolId, setSelectedToolId] = useState<string | null>(null);
@@ -39,13 +23,19 @@ export function StackMap() {
     const [customToolName, setCustomToolName] = useState("");
     const [selectedLayer, setSelectedLayer] = useState(7);
 
+    // ARCHITECT: Canvas Connection Logic
+    const drawEdge = (fromId: string, toId: string) => {
+        addConnection(fromId, toId);
+        console.log(`[CanvasContainer] Persistent edge drawn: ${fromId} -> ${toId}`);
+    };
+
     // Dragging logic
     const handleMouseDown = (e: React.MouseEvent, id: string) => {
         e.stopPropagation();
         if (e.shiftKey || selectedToolId) {
             // Connection Mode
             if (selectedToolId && selectedToolId !== id) {
-                addConnection(selectedToolId, id);
+                drawEdge(selectedToolId, id);
                 setSelectedToolId(null);
             } else {
                 setSelectedToolId(id);
@@ -142,23 +132,26 @@ export function StackMap() {
                 <div className="w-72 border-r border-zinc-800 bg-zinc-900 overflow-y-auto p-4 z-20 flex flex-col">
                     <h3 className="text-xs font-bold uppercase tracking-widest text-zinc-500 mb-4">Discovery Library</h3>
                     <div className="space-y-2 flex-1">
-                        {AVAILABLE_TOOLS.map(tool => (
-                            <button
-                                key={tool.id}
-                                onClick={() => handleAddTool(tool)}
-                                className="w-full flex items-center gap-3 p-3 rounded-lg border border-zinc-700 bg-zinc-800 hover:border-blue-500/50 hover:bg-zinc-800/50 transition-all group"
-                            >
-                                <div className="w-10 h-10 rounded-lg bg-zinc-900 flex items-center justify-center border border-zinc-700 group-hover:border-blue-500/50">
-                                    <tool.icon className="w-5 h-5 text-zinc-400 group-hover:text-blue-400" />
-                                </div>
-                                <div className="text-left flex-1 min-w-0">
-                                    <div className="text-sm font-bold text-zinc-200 truncate">{tool.name}</div>
-                                    <div className="text-[10px] text-zinc-500 uppercase flex items-center gap-1">
-                                        Layer {tool.layer} • {tool.category}
+                        {liveTechInventory.map(tool => {
+                            const IconComp = ICON_MAP[tool.icon as string] || Server;
+                            return (
+                                <button
+                                    key={tool.id}
+                                    onClick={() => handleAddTool({ ...tool, icon: IconComp })}
+                                    className="w-full flex items-center gap-3 p-3 rounded-lg border border-zinc-700 bg-zinc-800 hover:border-blue-500/50 hover:bg-zinc-800/50 transition-all group"
+                                >
+                                    <div className="w-10 h-10 rounded-lg bg-zinc-900 flex items-center justify-center border border-zinc-700 group-hover:border-blue-500/50">
+                                        <IconComp className="w-5 h-5 text-zinc-400 group-hover:text-blue-400" />
                                     </div>
-                                </div>
-                            </button>
-                        ))}
+                                    <div className="text-left flex-1 min-w-0">
+                                        <div className="text-sm font-bold text-zinc-200 truncate">{tool.name}</div>
+                                        <div className="text-[10px] text-zinc-500 uppercase flex items-center gap-1">
+                                            Layer {tool.layer} • {tool.category}
+                                        </div>
+                                    </div>
+                                </button>
+                            );
+                        })}
                     </div>
 
                     <button
