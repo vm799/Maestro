@@ -371,7 +371,7 @@ export function MaestroExplainer() {
                             <Shield className="w-5 h-5 text-emerald-500" />
                             MAESTRO Strategic Audit
                         </h1>
-                        <p className="text-[10px] text-zinc-500 uppercase tracking-widest font-mono">NIST AI RMF 1.0 Aligned / OWASP Verified</p>
+                        <p className="text-[10px] text-zinc-500 uppercase tracking-widest font-mono">Evidence-Based Risk Orchestration</p>
                     </div>
                 </div>
 
