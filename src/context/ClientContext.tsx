@@ -58,6 +58,8 @@ export interface Mitigation {
     evidence: string;
     layerRelevance: number[];
     status: 'proposed' | 'implemented';
+    riskTrigger?: string; // Links mitigation to a specific risk ID
+    governancePillar: 'Accountability' | 'Transparency' | 'Robustness' | 'Security';
 }
 
 // --- Metadata (Decoupled) ---
@@ -106,9 +108,9 @@ const AGENTIC_PATTERNS: AgenticPattern[] = [
 ];
 
 const MITIGATION_STRATEGIES: Mitigation[] = [
-    { id: "M-ADV", title: "Adversarial Training", description: "Resistance training.", evidence: "35% error reduction.", layerRelevance: [1], status: "proposed" },
-    { id: "M-AUTH", title: "Mutual TLS", description: "SPIFFE identities.", evidence: "99% prevention.", layerRelevance: [3, 4, 7], status: "proposed" },
-    { id: "M-DLP", title: "AI-Aware DLP", description: "PII monitoring.", evidence: "GDPR compliance tool.", layerRelevance: [2, 5], status: "proposed" }
+    { id: "M-ADV", title: "Adversarial Training", description: "Resistance training for model weights.", evidence: "Evidence Required: Awaiting Client Data", layerRelevance: [1], status: "proposed", riskTrigger: "V-L1", governancePillar: "Robustness" },
+    { id: "M-AUTH", title: "Identity Governance & mTLS", description: "Strict identity pinning for agentic flows.", evidence: "Evidence Required: Awaiting Client Data", layerRelevance: [3, 4, 7], status: "proposed", riskTrigger: "V-RISKY", governancePillar: "Security" },
+    { id: "M-DLP", title: "AI-Aware DLP", description: "PII monitoring in RAG pipelines.", evidence: "Evidence Required: Awaiting Client Data", layerRelevance: [2, 5], status: "proposed", riskTrigger: "V-L2", governancePillar: "Transparency" }
 ];
 
 export interface MaestroAuditResults {
@@ -133,6 +135,7 @@ export interface ClientState {
     // Identity
     companyName: string;
     industry: string;
+    region: string;
     costBasis: CostBasis;
 
     // The Stack (Phase 1 Input)
@@ -173,6 +176,7 @@ export interface ClientState {
     maestroLayers: MaestroLayer[];
     agenticPatterns: AgenticPattern[];
     mitigationLibrary: Mitigation[];
+    meetingPulse: string[]; // Real-time transcript extraction stream
 
     // Actions
     addTool: (tool: ToolNode) => void;
@@ -187,6 +191,7 @@ export interface ClientState {
     toggleMitigation: (id: string) => void;
     setMaestroAudit: (results: Partial<MaestroAuditResults>) => void;
     runMaestroAudit: () => void;
+    updateClientIdentity: (identity: { name: string; industry: string; region: string }) => void;
 }
 
 // --- Context ---
@@ -202,9 +207,11 @@ export function ClientProvider({ children }: { children: ReactNode }) {
         mitigations: [],
         selectedPattern: null
     });
-    const [shieldScore, setShieldScore] = useState(100); // Start perfect, drop as we find problems
-    const [spearScore, setSpearScore] = useState(50);    // Start neutral
-
+    const [companyName, setCompanyName] = useState("");
+    const [industry, setIndustry] = useState("");
+    const [region, setRegion] = useState("NA");
+    const [shieldScore, setShieldScore] = useState(100);
+    const [spearScore, setSpearScore] = useState(50);
     const [isOnboarding, setIsOnboarding] = useState(false);
 
     const activeMeetingContext = useMemo(() => isOnboarding ? {
@@ -227,6 +234,12 @@ export function ClientProvider({ children }: { children: ReactNode }) {
         { id: 'aws', name: 'AWS Bedrock', category: 'hosting', icon: 'Cloud', layer: 4, risky: false },
         { id: 'salesforce', name: 'Salesforce Agentforce', category: 'crm', icon: 'Database', layer: 7, risky: false },
     ] : [], [isOnboarding]);
+
+    const [meetingPulse] = useState<string[]>([
+        "CTO mentioned 'Shadow AI' in marketing department (Canva/Midjourney)",
+        "Internal DB 'Atlas-Core' exposed via unencrypted Python scripts",
+        "Agents are executing local shell commands without sandboxing"
+    ]);
 
     // NEW: Maturity Scores state
     const [maturityScores, setMaturityScoresState] = useState({
@@ -323,48 +336,68 @@ export function ClientProvider({ children }: { children: ReactNode }) {
 
     const runMaestroAudit = () => {
         const vulnerabilities: Risk[] = [];
-        const mitigations: Mitigation[] = [...maestroAudit.mitigations]; // Preserve status
 
-        // 1. Tool-Specific Risk Detection
+        // 1. Tool-Specific Risk Detection (Data Cascade)
         stack.forEach(tool => {
-            const isMitigated = mitigations.some(m => m.status === 'implemented' && m.layerRelevance.includes(tool.layer));
-
-            if (tool.layer === 1 && !isMitigated) {
+            if (tool.layer === 1) {
                 vulnerabilities.push({
-                    id: `V-L1-${tool.id}`,
+                    id: `V-L1`,
                     severity: 'critical',
                     category: 'security',
-                    description: `${tool.name} (Layer 1) is vulnerable to Model Stealing. Ensure it is wrapped in Maestro Sentinel.`,
+                    description: `${tool.name} (Layer 1) exposure detected. Risk: Model Stealing.`,
                     detectedBy: 'MAESTRO',
                     layer: 1
                 });
             }
-            // ... rest of detection logic ...
+            if (tool.layer === 2 && tool.risky) {
+                vulnerabilities.push({
+                    id: `V-L2`,
+                    severity: 'high',
+                    category: 'security',
+                    description: `Unencrypted RAG pipeline: ${tool.name}. Risk: Data Poisoning.`,
+                    detectedBy: 'MAESTRO',
+                    layer: 2
+                });
+            }
+            if (tool.risky) {
+                vulnerabilities.push({
+                    id: `V-RISKY`,
+                    severity: 'high',
+                    category: 'security',
+                    description: `Shadow AI Asset: ${tool.name} detected outside core governance.`,
+                    detectedBy: 'MAESTRO'
+                });
+            }
         });
 
-        // Ensure mitigations are suggested if not already there
-        if (vulnerabilities.length > 0 && mitigations.length === 0) {
-            // seed primary mitigations
-            mitigations.push(...MITIGATION_STRATEGIES);
-        }
+        // 2. Filter & Prioritize Mitigations (End-to-End Cascade)
+        // Only show mitigations whose trigger is in vulnerabilities
+        const activeMitigations = MITIGATION_STRATEGIES
+            .filter(m => vulnerabilities.some(v => v.id === m.riskTrigger))
+            .map(m => {
+                // Preserve implemented status from current state if found
+                const existing = maestroAudit.mitigations.find(em => em.id === m.id);
+                return existing ? { ...m, status: existing.status } : m;
+            });
 
         // 3. Dynamic Score Calculation
         const criticalCount = vulnerabilities.filter(v => v.severity === 'critical').length;
         const highCount = vulnerabilities.filter(v => v.severity === 'high').length;
-        setShieldScore(Math.max(0, 100 - (criticalCount * 20) - (highCount * 10)));
+        setShieldScore(Math.max(0, 100 - (criticalCount * 22) - (highCount * 12)));
 
         setMaestroAuditState(prev => ({
             ...prev,
             vulnerabilities,
-            mitigations,
+            mitigations: activeMitigations,
             selectedPattern: connections.length > 5 ? 'Multi-Agent' : 'Single-Agent'
         }));
     };
 
     return (
         <ClientContext.Provider value={{
-            companyName: isOnboarding ? "Sample Client A" : "Awaiting Client Name",
-            industry: isOnboarding ? "Technology" : "Pending Data Integration",
+            companyName: companyName || (isOnboarding ? "Sample Client A" : "Awaiting Client Name"),
+            industry: industry || (isOnboarding ? "Technology" : "Pending Data Integration"),
+            region,
             isOnboarding,
             toggleOnboarding: setIsOnboarding,
             costBasis,
@@ -382,6 +415,7 @@ export function ClientProvider({ children }: { children: ReactNode }) {
             maestroLayers: MAESTRO_LAYERS,
             agenticPatterns: AGENTIC_PATTERNS,
             mitigationLibrary: MITIGATION_STRATEGIES,
+            meetingPulse,
             addTool,
             updateToolPosition,
             removeTool,
@@ -393,7 +427,12 @@ export function ClientProvider({ children }: { children: ReactNode }) {
             setMaturityScores,
             setMaestroAudit,
             runMaestroAudit,
-            toggleMitigation
+            toggleMitigation,
+            updateClientIdentity: (id) => {
+                setCompanyName(id.name);
+                setIndustry(id.industry);
+                setRegion(id.region);
+            }
         }}>
             {children}
         </ClientContext.Provider>

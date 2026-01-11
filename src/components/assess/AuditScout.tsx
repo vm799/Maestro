@@ -55,7 +55,8 @@ const AUDIT_QUESTIONS = [
 export function AuditScout() {
     const {
         identifiedRisks, frictionCost, costBasis, updateCostBasis,
-        shieldScore, spearScore, updateScores, isOnboarding
+        shieldScore, spearScore, updateScores, isOnboarding,
+        meetingPulse
     } = useClient();
 
     const [messages, setMessages] = useState<Message[]>([]);
@@ -87,8 +88,8 @@ export function AuditScout() {
                 id: 'empty',
                 sender: 'bot',
                 text: isOnboarding
-                    ? "Welcome to the Sandbox. Your simulated stack looks clean. Add some potentially risky tools in the Stack Map to see me in action!"
-                    : "Awaiting live meeting sync for audit context... Connect the Maestro MeetingParser to begin real-time risk orchestration."
+                    ? "Welcome to the Sandbox. I'm scanning the meeting pulse for real-time risk extraction. Add tools in Phase 1 to see the cascade."
+                    : "Awaiting live meeting sync... I will extract risks from the transcript pulse as they happen."
             }]);
         }
     }, [identifiedRisks.length, isOnboarding]); // Only run once or when risks change significantly
@@ -208,7 +209,33 @@ export function AuditScout() {
     };
 
     return (
-        <div className="flex h-full bg-zinc-50 dark:bg-zinc-950 p-8 gap-8">
+        <div className="flex h-full bg-zinc-50 dark:bg-zinc-950 p-8 gap-8 overflow-hidden">
+            {/* Live Extraction Stream (Phase 2) */}
+            <div className="w-72 flex flex-col gap-4 shrink-0">
+                <div className="p-4 bg-zinc-900 border border-zinc-800 rounded-xl">
+                    <h4 className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-4 flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                        Live Extraction Stream
+                    </h4>
+                    <div className="space-y-3">
+                        {meetingPulse.map((pulse, i) => (
+                            <div key={i} className="p-3 bg-zinc-950 border border-zinc-800 rounded-lg animate-in fade-in slide-in-from-left duration-500" style={{ animationDelay: `${i * 200}ms` }}>
+                                <p className="text-[11px] text-zinc-400 font-mono leading-relaxed">
+                                    <span className="text-zinc-600 mr-2">[{14 + i}:04:22]</span>
+                                    {pulse}
+                                </p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-xl">
+                    <p className="text-[10px] text-amber-500 font-bold leading-tight">
+                        ADVISORY: The Scout is cross-referencing this stream with mapped assets to detect "Shadow AI" collisions.
+                    </p>
+                </div>
+            </div>
+
             {/* Chat Area */}
             <div className="flex-1 flex flex-col max-w-3xl mx-auto bg-card border border-border rounded-xl shadow-lg overflow-hidden">
                 <div className="p-4 border-b border-border bg-muted/30 flex items-center justify-between">

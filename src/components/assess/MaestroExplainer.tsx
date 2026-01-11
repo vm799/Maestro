@@ -193,7 +193,7 @@ function AuditView({ toolsByLayer, connections, vulnerabilities, maestroLayers }
     );
 }
 
-function MitigationView({ toolsByLayer, proposedMitigations, mitigationLibrary, maestroLayers, toggleMitigation }: any) {
+function MitigationView({ proposedMitigations, mitigationLibrary, maestroLayers, toggleMitigation }: any) {
     const allMitigations = useMemo(() => {
         const merged = [...mitigationLibrary];
         proposedMitigations?.forEach((pm: Mitigation) => {
@@ -212,7 +212,6 @@ function MitigationView({ toolsByLayer, proposedMitigations, mitigationLibrary, 
             <div className="space-y-6">
                 {allMitigations.map((strat: Mitigation) => {
                     const affectedLayers = maestroLayers.filter((l: MaestroLayer) => strat.layerRelevance.includes(l.id));
-                    const toolsProtected = strat.layerRelevance.reduce((acc: number, lId: number) => acc + (toolsByLayer[lId]?.length || 0), 0);
 
                     return (
                         <div key={strat.id} className="p-8 bg-zinc-900 border border-zinc-800 rounded-3xl relative overflow-hidden group">
@@ -224,15 +223,18 @@ function MitigationView({ toolsByLayer, proposedMitigations, mitigationLibrary, 
                                 <div>
                                     <div className="flex items-center gap-3 mb-2">
                                         <span className="px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-[10px] font-bold rounded-full uppercase tracking-tighter">
-                                            {strat.id}
+                                            Priority Prescriber
+                                        </span>
+                                        <span className="px-3 py-1 bg-zinc-800 border border-zinc-700 text-zinc-400 text-[10px] font-bold rounded-full uppercase">
+                                            {strat.governancePillar}
                                         </span>
                                         <h3 className="text-2xl font-bold">{strat.title}</h3>
                                     </div>
                                     <p className="text-zinc-400 leading-relaxed max-w-xl">{strat.description}</p>
                                 </div>
                                 <div className="text-right">
-                                    <div className="text-[10px] font-bold text-zinc-500 uppercase mb-1">Impact Radius</div>
-                                    <div className="text-3xl font-black text-white">{toolsProtected >= 1 ? 'RELEVANT' : 'ADVISORY'}</div>
+                                    <div className="text-[10px] font-bold text-zinc-500 uppercase mb-1">Audit Status</div>
+                                    <div className="text-2xl font-black text-emerald-400">ACTIVE RECOMMENDATION</div>
                                 </div>
                             </div>
 
@@ -242,7 +244,7 @@ function MitigationView({ toolsByLayer, proposedMitigations, mitigationLibrary, 
                                         <Layers className="w-3 h-3" /> Mitigated Layers
                                     </div>
                                     <div className="flex flex-wrap gap-2">
-                                        {affectedLayers.map((l: MaestroLayer) => (
+                                        {affectedLayers.map((l: any) => (
                                             <span key={l.id} className="px-2 py-1 bg-zinc-900 border border-zinc-800 rounded text-[10px] text-zinc-400">
                                                 Layer {l.id}
                                             </span>

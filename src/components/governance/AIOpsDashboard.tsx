@@ -134,7 +134,7 @@ export function AIOpsDashboard() {
                             </div>
                             <div className="flex justify-between text-xs">
                                 <span className="text-zinc-500">Agent Utilization</span>
-                                <span className="font-mono">88%</span>
+                                <span className="font-mono text-zinc-300 italic">Evidence Required</span>
                             </div>
                         </div>
                     </div>
