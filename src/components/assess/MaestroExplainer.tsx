@@ -340,7 +340,13 @@ export function MaestroExplainer() {
             <div className="flex-1 flex overflow-hidden">
                 {/* Main Content Area */}
                 <div className="flex-1 overflow-y-auto bg-zinc-950 p-10">
-                    {activeView === 'theory' && <TheoryView selectedLayer={selectedLayer} setSelectedLayerId={setSelectedLayerId} />}
+                    {activeView === 'theory' && (
+                        <TheoryView
+                            selectedLayer={selectedLayer}
+                            setSelectedLayerId={setSelectedLayerId}
+                            maestroAudit={maestroAudit}
+                        />
+                    )}
                     {activeView === 'audit' && (
                         <AuditView
                             toolsByLayer={toolsByLayer}
@@ -425,7 +431,9 @@ export function MaestroExplainer() {
 
 // --- Specific Views ---
 
-function TheoryView({ selectedLayer, setSelectedLayerId }: any) {
+function TheoryView({ selectedLayer, setSelectedLayerId, maestroAudit }: any) {
+    const { vulnerabilities } = maestroAudit;
+
     return (
         <div className="max-w-4xl">
             <div className="mb-12">
@@ -438,40 +446,56 @@ function TheoryView({ selectedLayer, setSelectedLayerId }: any) {
             </div>
 
             <div className="relative space-y-[-20px] pb-20 mt-20">
-                {MAESTRO_LAYERS.map((layer, idx) => (
-                    <button
-                        key={layer.id}
-                        onClick={() => setSelectedLayerId(layer.id)}
-                        className={`group relative w-full h-[100px] transition-all duration-500 hover:translate-x-4 ${selectedLayer?.id === layer.id ? "scale-105 z-20" : "scale-100 z-10"
-                            }`}
-                        style={{
-                            transform: `perspective(1000px) rotateX(25deg)`,
-                            zIndex: 20 - idx
-                        }}
-                    >
-                        <div className={`absolute inset-0 rounded-2xl border-2 transition-all duration-300 flex items-center px-10 ${selectedLayer?.id === layer.id
-                            ? "bg-zinc-800 border-emerald-500 shadow-[0_0_50px_rgba(16,185,129,0.3)]"
-                            : "bg-zinc-900/80 border-zinc-700 bg-opacity-90 group-hover:border-zinc-500"
-                            }`}>
-                            <div className={`p-4 rounded-xl bg-zinc-950 border border-zinc-800 mr-8`}>
-                                <layer.icon className={`w-6 h-6 ${selectedLayer?.id === layer.id ? "text-emerald-400" : "text-zinc-500"}`} />
-                            </div>
-                            <div className="flex-1 text-left">
-                                <div className="text-[10px] font-mono font-bold text-zinc-500 tracking-[0.3em]">LAYER 0{layer.id}</div>
-                                <h3 className="text-xl font-bold">{layer.name.split(': ')[1]}</h3>
-                            </div>
-                            <div className="flex items-center gap-6 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <div className="text-right">
-                                    <div className="text-[10px] font-bold text-zinc-600 uppercase">Threat Nodes</div>
-                                    <div className="text-lg font-bold text-white">{layer.threats.length} Identified</div>
+                {MAESTRO_LAYERS.map((layer, idx) => {
+                    const layerRisks = vulnerabilities?.filter((v: any) => v.layer === layer.id) || [];
+                    const hasCritical = layerRisks.some((r: any) => r.severity === 'critical');
+
+                    return (
+                        <button
+                            key={layer.id}
+                            onClick={() => setSelectedLayerId(layer.id)}
+                            className={`group relative w-full h-[100px] transition-all duration-500 hover:translate-x-4 ${selectedLayer?.id === layer.id ? "scale-105 z-20" : "scale-100 z-10"
+                                }`}
+                            style={{
+                                transform: `perspective(1000px) rotateX(25deg)`,
+                                zIndex: 20 - idx
+                            }}
+                        >
+                            <div className={`absolute inset-0 rounded-2xl border-2 transition-all duration-300 flex items-center px-10 ${selectedLayer?.id === layer.id
+                                ? "bg-zinc-800 border-emerald-500 shadow-[0_0_50px_rgba(16,185,129,0.3)]"
+                                : layerRisks.length > 0
+                                    ? hasCritical
+                                        ? "bg-red-950/20 border-red-500 shadow-[0_0_30px_rgba(239,68,68,0.2)]"
+                                        : "bg-amber-950/20 border-amber-500/50 shadow-[0_0_20px_rgba(245,158,11,0.1)]"
+                                    : "bg-zinc-900/80 border-zinc-700 bg-opacity-90 group-hover:border-zinc-500"
+                                }`}>
+                                <div className={`p-4 rounded-xl bg-zinc-950 border border-zinc-800 mr-8`}>
+                                    <layer.icon className={`w-6 h-6 ${selectedLayer?.id === layer.id ? "text-emerald-400" : "text-zinc-500"}`} />
                                 </div>
-                                <div className="w-10 h-10 rounded-full border border-zinc-700 flex items-center justify-center">
-                                    <ChevronLeft className="w-5 h-5 rotate-180" />
+                                <div className="flex-1 text-left">
+                                    <div className="text-[10px] font-mono font-bold text-zinc-500 tracking-[0.3em]">LAYER 0{layer.id}</div>
+                                    <div className="flex items-center gap-3">
+                                        <h3 className="text-xl font-bold">{layer.name.split(': ')[1]}</h3>
+                                        {layerRisks.length > 0 && (
+                                            <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-tighter ${hasCritical ? 'bg-red-500 text-white' : 'bg-amber-500 text-black'}`}>
+                                                Red Flag: {layerRisks.length} Risk{layerRisks.length > 1 ? 's' : ''}
+                                            </span>
+                                        )}
+                                    </div>
+                                </div>
+                                <div className={`flex items-center gap-6 transition-opacity ${layerRisks.length > 0 ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
+                                    <div className="text-right">
+                                        <div className={`text-[10px] font-bold uppercase ${layerRisks.length > 0 ? (hasCritical ? 'text-red-400' : 'text-amber-400') : 'text-zinc-600'}`}>Threat Nodes</div>
+                                        <div className="text-lg font-bold text-white">{layerRisks.length > 0 ? layerRisks.length : layer.threats.length} Identified</div>
+                                    </div>
+                                    <div className={`w-10 h-10 rounded-full border flex items-center justify-center ${layerRisks.length > 0 ? (hasCritical ? 'border-red-500 text-red-500' : 'border-amber-500 text-amber-500') : 'border-zinc-700 text-zinc-400'}`}>
+                                        <ChevronLeft className="w-5 h-5 rotate-180" />
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    </button>
-                ))}
+                        </button>
+                    )
+                })}
             </div>
         </div>
     );

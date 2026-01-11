@@ -1,15 +1,21 @@
 import { useState } from 'react';
 import { Plus, ArrowRight, X, Building2 } from 'lucide-react';
+import { useClient } from '../context/ClientContext';
 
 export function Dashboard() {
+    const { isOnboarding } = useClient();
+
     // State for the "New Engagement" Wizard
     const [isWizardOpen, setIsWizardOpen] = useState(false);
     const [newClient, setNewClient] = useState({ name: '', industry: '', region: 'NA' });
 
     // Real Data Management
-    const [clients, setClients] = useState([
-        { id: 1, name: "Northwind Traders", industry: "Logistics", phase: "Discovery", status: "Active" },
-    ]);
+    const [clients, setClients] = useState<any[]>([]);
+
+    // Inject sample data ONLY if in onboarding mode
+    const displayClients = isOnboarding
+        ? [{ id: 'sample-a', name: "Sample Client A (Sandbox)", industry: "eCommerce", phase: "Discovery", status: "Demo" }, ...clients]
+        : clients;
 
     const handleCreateClient = (e: any) => {
         e.preventDefault();
@@ -49,7 +55,7 @@ export function Dashboard() {
 
             {/* Client Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {clients.map(client => (
+                {displayClients.map(client => (
                     <div
                         key={client.id}
                         onClick={() => loadClient(client)}
@@ -89,9 +95,13 @@ export function Dashboard() {
                 ))}
 
                 {/* Empty State / Add Button */}
-                {clients.length === 0 && (
-                    <div className="col-span-full text-center py-20 border-2 border-dashed border-border rounded-xl">
-                        <p className="text-muted-foreground">No active engagements. Start a new project.</p>
+                {displayClients.length === 0 && (
+                    <div className="col-span-full text-center py-20 border-2 border-dashed border-zinc-800 rounded-xl bg-zinc-900/20">
+                        <Building2 className="w-12 h-12 text-zinc-800 mx-auto mb-4" />
+                        <h3 className="text-xl font-bold text-zinc-500 mb-2">Portfolio Empty</h3>
+                        <p className="text-zinc-600 max-w-xs mx-auto text-sm italic">
+                            Awaiting live client meeting transcripts or CRM integration... (Pending Real Data)
+                        </p>
                     </div>
                 )}
             </div>

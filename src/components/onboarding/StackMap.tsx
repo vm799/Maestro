@@ -202,6 +202,7 @@ export function StackMap() {
                         <div
                             key={tool.id}
                             onMouseDown={(e) => handleMouseDown(e, tool.id)}
+                            onClick={(e) => e.stopPropagation()}
                             className={`absolute p-4 rounded-xl border-2 shadow-2xl cursor-grab active:cursor-grabbing backdrop-blur-md transition-all group ${selectedToolId === tool.id
                                 ? "border-blue-500 ring-4 ring-blue-500/20 bg-blue-900/20"
                                 : tool.risky
@@ -244,58 +245,60 @@ export function StackMap() {
             </div>
 
             {/* Custom Modal */}
-            {isCustomModalOpen && (
-                <div className="absolute inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center z-50">
-                    <div className="bg-zinc-900 border border-zinc-700 rounded-2xl p-8 w-[450px] shadow-2xl">
-                        <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
-                            Identify Legacy / Custom Asset
-                        </h3>
-                        <form onSubmit={submitCustomTool} className="space-y-6">
-                            <div>
-                                <label className="text-xs font-bold text-zinc-500 uppercase block mb-2">Internal Service Name</label>
-                                <input
-                                    autoFocus
-                                    className="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-4 text-sm focus:border-blue-500 outline-none transition-all"
-                                    placeholder="e.g. Athena-v3-Core-API"
-                                    value={customToolName}
-                                    onChange={e => setCustomToolName(e.target.value)}
-                                />
-                            </div>
-
-                            <div>
-                                <label className="text-xs font-bold text-zinc-500 uppercase block mb-2">Target Architecture Layer</label>
-                                <div className="grid grid-cols-4 gap-2">
-                                    {[1, 2, 3, 4, 5, 6, 7].map(l => (
-                                        <button
-                                            key={l}
-                                            type="button"
-                                            onClick={() => setSelectedLayer(l)}
-                                            className={`py-2 rounded-lg text-xs font-bold border transition-all ${selectedLayer === l
-                                                ? "bg-blue-600 border-blue-500 text-white"
-                                                : "bg-zinc-800 border-zinc-700 text-zinc-400 hover:border-zinc-500"
-                                                }`}
-                                        >
-                                            Layer {l}
-                                        </button>
-                                    ))}
+            {
+                isCustomModalOpen && (
+                    <div className="absolute inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center z-50">
+                        <div className="bg-zinc-900 border border-zinc-700 rounded-2xl p-8 w-[450px] shadow-2xl">
+                            <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
+                                Identify Legacy / Custom Asset
+                            </h3>
+                            <form onSubmit={submitCustomTool} className="space-y-6">
+                                <div>
+                                    <label className="text-xs font-bold text-zinc-500 uppercase block mb-2">Internal Service Name</label>
+                                    <input
+                                        autoFocus
+                                        className="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-4 text-sm focus:border-blue-500 outline-none transition-all"
+                                        placeholder="e.g. Athena-v3-Core-API"
+                                        value={customToolName}
+                                        onChange={e => setCustomToolName(e.target.value)}
+                                    />
                                 </div>
-                            </div>
 
-                            <div className="flex gap-4 pt-4">
-                                <button type="button" onClick={() => setIsCustomModalOpen(false)} className="flex-1 py-3 text-sm font-bold text-zinc-400 hover:bg-zinc-800 rounded-xl">Cancel</button>
-                                <button type="submit" disabled={!customToolName} className="flex-1 py-3 bg-blue-600 text-white font-bold text-sm rounded-xl hover:bg-blue-500 disabled:opacity-50 shadow-lg shadow-blue-900/20">Add to Ecosystem</button>
-                            </div>
-                        </form>
+                                <div>
+                                    <label className="text-xs font-bold text-zinc-500 uppercase block mb-2">Target Architecture Layer</label>
+                                    <div className="grid grid-cols-4 gap-2">
+                                        {[1, 2, 3, 4, 5, 6, 7].map(l => (
+                                            <button
+                                                key={l}
+                                                type="button"
+                                                onClick={() => setSelectedLayer(l)}
+                                                className={`py-2 rounded-lg text-xs font-bold border transition-all ${selectedLayer === l
+                                                    ? "bg-blue-600 border-blue-500 text-white"
+                                                    : "bg-zinc-800 border-zinc-700 text-zinc-400 hover:border-zinc-500"
+                                                    }`}
+                                            >
+                                                Layer {l}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div className="flex gap-4 pt-4">
+                                    <button type="button" onClick={() => setIsCustomModalOpen(false)} className="flex-1 py-3 text-sm font-bold text-zinc-400 hover:bg-zinc-800 rounded-xl">Cancel</button>
+                                    <button type="submit" disabled={!customToolName} className="flex-1 py-3 bg-blue-600 text-white font-bold text-sm rounded-xl hover:bg-blue-500 disabled:opacity-50 shadow-lg shadow-blue-900/20">Add to Ecosystem</button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
-                </div>
-            )}
+                )
+            }
 
             <style>{`
                 @keyframes dash {
                     to { stroke-dashoffset: -1000; }
                 }
             `}</style>
-        </div>
+        </div >
     );
 }
 

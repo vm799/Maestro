@@ -4,13 +4,18 @@ import { Shield, Zap, Activity, Bot } from 'lucide-react';
 import { AgentBlueprint } from './AgentBlueprint';
 
 export function AIOpsDashboard() {
-    const { shieldScore, spearScore, identifiedRisks, frictionCost } = useClient();
+    const { shieldScore, spearScore, identifiedRisks, frictionCost, isOnboarding } = useClient();
 
-    // Simulate "Live" Metrics
+    // Live Event Stream state
     const [events, setEvents] = useState<string[]>([]);
     const [selectedAgent, setSelectedAgent] = useState<any>(null); // For modal
 
     useEffect(() => {
+        if (!isOnboarding) {
+            setEvents(["🛰️ Monitoring live data feeds...", "📡 Awaiting neural signatures..."]);
+            return;
+        }
+
         const interval = setInterval(() => {
             const actions = [
                 "🛡️ Governor blocked PII in 'Sales_Bot_04'",
@@ -22,7 +27,7 @@ export function AIOpsDashboard() {
             setEvents(prev => [randomAction, ...prev].slice(0, 8));
         }, 3000);
         return () => clearInterval(interval);
-    }, []);
+    }, [isOnboarding]);
 
     const AgentCard = ({ name, role, status, icon: Icon }: any) => (
         <div
@@ -138,11 +143,11 @@ export function AIOpsDashboard() {
                 {/* Center Column: The Agent Fleet Grid */}
                 {/* Center Column: The Agent Fleet Grid */}
                 <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* Fixed Agent List for Demo */}
-                    <AgentCard name="Audit Scout" role="Stack Discovery & Risk Analysis" status="active" icon={Zap} />
-                    <AgentCard name="The Governor" role="Real-time PII & Compliance Filter" status="active" icon={Shield} />
-                    <AgentCard name="The Writer" role="Content Generation (PhD)" status="idle" icon={Bot} />
-                    <AgentCard name="The Analyst" role="ROI & Friction Cost Calc" status="active" icon={Activity} />
+                    {/* Maestro System Agents */}
+                    <AgentCard name="Audit Scout" role="Stack Discovery & Discovery" status="active" icon={Zap} />
+                    <AgentCard name="The Governor" role="Real-time PII & Security" status="active" icon={Shield} />
+                    <AgentCard name="System Analyst" role="ROI & Friction Diagnostic" status="active" icon={Activity} />
+                    <AgentCard name="Neural Engine" role="Core Intelligence Layer" status="idle" icon={Bot} />
                 </div>
             </div>
 

@@ -66,6 +66,10 @@ export interface ClientState {
     spearScore: number;  // 0-100 (Culture/Adoption)
     frictionCost: number; // Estimated monthly waste
 
+    // NEW: Onboarding Sandbox
+    isOnboarding: boolean;
+    toggleOnboarding: (val: boolean) => void;
+
     // NEW: Maturity Scales (from Phase 1.5 Assessment)
     maturityScores: {
         literacy: number;      // 0-4 scale
@@ -107,6 +111,8 @@ export function ClientProvider({ children }: { children: ReactNode }) {
     });
     const [shieldScore, setShieldScore] = useState(100); // Start perfect, drop as we find problems
     const [spearScore, setSpearScore] = useState(50);    // Start neutral
+
+    const [isOnboarding, setIsOnboarding] = useState(false);
 
     // NEW: Maturity Scores state
     const [maturityScores, setMaturityScoresState] = useState({
@@ -196,14 +202,14 @@ export function ClientProvider({ children }: { children: ReactNode }) {
         const vulnerabilities: Risk[] = [];
         const mitigations: Mitigation[] = [];
 
-        // 1. Layer-Specific Risk Detection
+        // 1. Tool-Specific Risk Detection
         stack.forEach(tool => {
             if (tool.layer === 1) {
                 vulnerabilities.push({
                     id: `V-L1-${tool.id}`,
                     severity: 'critical',
                     category: 'security',
-                    description: `${tool.name} (Layer 1) is vulnerable to Model Stealing and Adversarial Examples via public API endpoints.`,
+                    description: `${tool.name} (Layer 1) is vulnerable to Model Stealing. Ensure it is wrapped in Maestro Sentinel.`,
                     detectedBy: 'MAESTRO',
                     layer: 1
                 });
@@ -213,57 +219,57 @@ export function ClientProvider({ children }: { children: ReactNode }) {
                     id: `V-L2-${tool.id}`,
                     severity: 'high',
                     category: 'security',
-                    description: `Unencrypted RAG pipeline detected for ${tool.name}. Risk of Data Poisoning in vector store.`,
+                    description: `Unencrypted RAG pipeline detected for ${tool.name}. Risk of Data Poisoning.`,
                     detectedBy: 'MAESTRO',
                     layer: 2
                 });
             }
-            if (tool.layer === 7) {
-                vulnerabilities.push({
-                    id: `V-L7-${tool.id}`,
-                    severity: 'medium',
-                    category: 'operational',
-                    description: `${tool.name} lacks verified Agent Identity. Potential for Agent Impersonation in the ecosystem.`,
-                    detectedBy: 'MAESTRO',
-                    layer: 7
-                });
+        });
+
+        // 2. Connection-Based Data Flow Analysis
+        connections.forEach(conn => {
+            const from = stack.find(t => t.id === conn.fromId);
+            const to = stack.find(t => t.id === conn.toId);
+
+            if (from && to) {
+                // Direct Ecosystem to Model Exposure (L7 -> L1)
+                if (from.layer === 7 && to.layer === 1) {
+                    vulnerabilities.push({
+                        id: `V-CONN-L7L1-${conn.fromId}`,
+                        severity: 'critical',
+                        category: 'security',
+                        description: `Direct Data Flow: ${from.name} is connected directly to ${to.name}. Bypass Risk: Prompt Injection (L7) hitting Model (L1) without Layer 4 Sandbox.`,
+                        detectedBy: 'MAESTRO',
+                        layer: 7
+                    });
+                    mitigations.push({
+                        id: 'M-SANDBOX',
+                        title: 'Insert Layer 4 Sandbox',
+                        description: 'Route all Ecosystem agent traffic through a Layer 4 validation sandbox.',
+                        evidence: 'NIST AI RMF 1.0 (27.2)',
+                        layerRelevance: [4],
+                        status: 'proposed'
+                    });
+                }
+
+                // Risky Tool to Data Store (Risky -> L2)
+                if (from.risky && to.layer === 2) {
+                    vulnerabilities.push({
+                        id: `V-RISKY-DATA-${from.id}`,
+                        severity: 'critical',
+                        category: 'security',
+                        description: `Sensitive Access: ${from.name} (Unverified/Risky) has direct access to ${to.name} (Layer 2 Data store).`,
+                        detectedBy: 'MAESTRO',
+                        layer: 2
+                    });
+                }
             }
         });
 
-        // 2. Cross-Layer Logic (e.g. Layer 4 impacting Layer 1)
-        const hasInfra = stack.some(t => t.layer === 4);
-        const hasModel = stack.some(t => t.layer === 1);
-        if (hasInfra && hasModel) {
-            vulnerabilities.push({
-                id: 'V-CROSS-L4-L1',
-                severity: 'critical',
-                category: 'security',
-                description: 'Cross-Layer Criticality: Infrastructure (L4) vulnerabilities could allow direct model tampering or weights exfiltration (L1).',
-                detectedBy: 'MAESTRO'
-            });
-        }
-
-        // 3. Propose Mitigations based on Findings
-        if (vulnerabilities.some(v => v.layer === 1)) {
-            mitigations.push({
-                id: 'M-ADV-1',
-                title: 'Adversarial Training Implementation',
-                description: 'Hardening models against Sponge attacks and jailbreaking.',
-                evidence: 'NIST AI RMF 1.0 (27.2)',
-                layerRelevance: [1],
-                status: 'proposed'
-            });
-        }
-        if (vulnerabilities.some(v => v.layer === 2)) {
-            mitigations.push({
-                id: 'M-DLP-1',
-                title: 'Vector Store Encryption & DLP',
-                description: 'Encrypting retrievals and scrubbing PII from RAG inputs.',
-                evidence: 'ISO 27001 Control A.8.12',
-                layerRelevance: [2],
-                status: 'proposed'
-            });
-        }
+        // 3. Dynamic Score Calculation
+        const criticalCount = vulnerabilities.filter(v => v.severity === 'critical').length;
+        const highCount = vulnerabilities.filter(v => v.severity === 'high').length;
+        setShieldScore(Math.max(0, 100 - (criticalCount * 20) - (highCount * 10)));
 
         setMaestroAuditState({
             vulnerabilities,
@@ -274,8 +280,10 @@ export function ClientProvider({ children }: { children: ReactNode }) {
 
     return (
         <ClientContext.Provider value={{
-            companyName: "Acme Corp", // Placeholder
-            industry: "Technology",
+            companyName: isOnboarding ? "Sample Client A" : "Awaiting Client Name",
+            industry: isOnboarding ? "Technology" : "Pending Data Integration",
+            isOnboarding,
+            toggleOnboarding: setIsOnboarding,
             costBasis,
             stack,
             connections,
