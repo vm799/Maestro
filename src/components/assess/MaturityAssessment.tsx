@@ -131,24 +131,12 @@ export function MaturityAssessment() {
         return Number((govScores.reduce((a, b) => a + b, 0) / govScores.length).toFixed(1));
     };
 
-    // Helper to format scores for the report
-    const getFormattedScores = () => {
-        return ASSESSMENT_RUBRIC.map(section => {
-            const sectionQuestions = section.questions.map(q => q.id);
-            const sectionScores = sectionQuestions.map(id => answers[id] || 0);
-            const avg = sectionScores.reduce((a, b) => a + b, 0) / (sectionScores.length || 1);
-            return { category: section.title.split(":")[0], score: avg };
-        });
-    };
 
     return (
         <div className="h-full flex flex-col bg-zinc-50 dark:bg-zinc-950 overflow-hidden relative">
             {showReport && (
                 <ExecutiveReport
                     onClose={() => setShowReport(false)}
-                    scores={getFormattedScores()}
-                    rubric={ASSESSMENT_RUBRIC}
-                    answers={answers}
                 />
             )}
 

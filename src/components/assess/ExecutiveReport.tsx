@@ -106,6 +106,40 @@ export function ExecutiveReport({ onClose }: ExecutiveReportProps) {
                             </div>
                         </div>
 
+                        {/* Phase 1.5: Maturity Assessment (Optional) */}
+                        {report.maturityScores && (
+                            <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden print:bg-white print:border-zinc-200">
+                                <div className="p-4 border-b border-zinc-800 bg-zinc-900/50 flex justify-between items-center print:bg-zinc-50 print:border-zinc-200">
+                                    <h3 className="text-xs font-bold uppercase tracking-widest text-emerald-400 flex items-center gap-2 print:text-emerald-700">
+                                        <Activity className="w-4 h-4" /> Phase 1.5: Maturity Diagnostic
+                                    </h3>
+                                    <div className="text-xl font-bold font-mono text-white print:text-black">
+                                        {report.maturityScores.overall} <span className="text-[10px] text-zinc-500">/ 4.0</span>
+                                    </div>
+                                </div>
+                                <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-8 print:grid-cols-2">
+                                    <div className="space-y-2">
+                                        <div className="flex justify-between text-xs font-bold text-zinc-400 uppercase">
+                                            <span>AI Literacy</span>
+                                            <span>{report.maturityScores.literacy} / 4.0</span>
+                                        </div>
+                                        <div className="h-2 bg-zinc-800 rounded-full overflow-hidden print:bg-zinc-100">
+                                            <div className="h-full bg-blue-500 rounded-full" style={{ width: `${(report.maturityScores.literacy / 4) * 100}%` }} />
+                                        </div>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <div className="flex justify-between text-xs font-bold text-zinc-400 uppercase">
+                                            <span>Governance Index</span>
+                                            <span>{report.maturityScores.governance} / 4.0</span>
+                                        </div>
+                                        <div className="h-2 bg-zinc-800 rounded-full overflow-hidden print:bg-zinc-100">
+                                            <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${(report.maturityScores.governance / 4) * 100}%` }} />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
                         {/* Phase 2: Discovery Findings */}
                         <div className="bg-zinc-900/30 border border-zinc-800 rounded-xl overflow-hidden print:bg-white print:border-zinc-200">
                             <div className="p-4 border-b border-zinc-800 bg-zinc-900/50 flex items-center gap-2 print:bg-zinc-50 print:border-zinc-200">
