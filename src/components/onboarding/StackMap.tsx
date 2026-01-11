@@ -32,8 +32,9 @@ export function StackMap() {
     // Dragging logic
     const handleMouseDown = (e: React.MouseEvent, id: string) => {
         e.stopPropagation();
-        if (e.shiftKey || selectedToolId) {
-            // Connection Mode
+
+        if (e.shiftKey) {
+            // Architect: Shift+Click Connection Pattern
             if (selectedToolId && selectedToolId !== id) {
                 drawEdge(selectedToolId, id);
                 setSelectedToolId(null);
@@ -42,9 +43,10 @@ export function StackMap() {
             }
             return;
         }
+
         setIsDragging(true);
         setDraggedToolId(id);
-        setSelectedToolId(id); // Select on drag too
+        setSelectedToolId(id);
     };
 
     const handleMouseMove = (e: React.MouseEvent) => {

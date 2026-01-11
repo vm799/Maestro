@@ -63,7 +63,7 @@ export function AuditModule() {
                                         <option>ISO 42001 (AI Management)</option>
                                         <option>NIST AI RMF</option>
                                         <option>EU AI Act</option>
-                                        <option>GDPR / SOC2</option>
+                                        <option>GDPR / MAESTRO Framework</option>
                                     </select>
                                 </div>
                             </div>

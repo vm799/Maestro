@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, ArrowRight, X, Building2 } from 'lucide-react';
+import { Plus, ArrowRight, X, Building2, Activity } from 'lucide-react';
 import { useClient } from '../context/ClientContext';
 
 export function Dashboard() {
@@ -96,11 +96,11 @@ export function Dashboard() {
 
                 {/* Empty State / Add Button */}
                 {displayClients.length === 0 && (
-                    <div className="col-span-full text-center py-20 border-2 border-dashed border-zinc-800 rounded-xl bg-zinc-900/20">
-                        <Building2 className="w-12 h-12 text-zinc-800 mx-auto mb-4" />
-                        <h3 className="text-xl font-bold text-zinc-500 mb-2">Portfolio Empty</h3>
-                        <p className="text-zinc-600 max-w-xs mx-auto text-sm italic">
-                            Awaiting live client meeting transcripts or CRM integration... (Pending Real Data)
+                    <div className="col-span-full text-center py-32 border-2 border-dashed border-zinc-800 rounded-3xl bg-zinc-900/20 backdrop-blur-sm">
+                        <Activity className="w-16 h-16 text-zinc-700 mx-auto mb-6 animate-pulse" />
+                        <h3 className="text-2xl font-bold text-zinc-400 mb-3">Waiting for Meeting Sync...</h3>
+                        <p className="text-zinc-600 max-w-sm mx-auto text-sm leading-relaxed">
+                            No active engagements detected. Connect the <span className="text-primary font-bold">Maestro MeetingParser</span> or CRM hooks to initialize real-time data orchestration.
                         </p>
                     </div>
                 )}

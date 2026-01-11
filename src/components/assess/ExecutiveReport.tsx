@@ -178,7 +178,7 @@ export function ExecutiveReport({ onClose, scores, rubric, answers }: ExecutiveR
                                     };
                                     const rec = recommendations[score.category] || {
                                         action: 'Conduct gap assessment and implement controls',
-                                        source: 'SOC 2 Type II',
+                                        source: 'Internal Security Controls',
                                         reference: 'AICPA TSC CC6.1 - Logical Access Controls'
                                     };
 

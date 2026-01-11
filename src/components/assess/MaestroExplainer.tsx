@@ -193,7 +193,7 @@ function AuditView({ toolsByLayer, connections, vulnerabilities, maestroLayers }
     );
 }
 
-function MitigationView({ toolsByLayer, proposedMitigations, mitigationLibrary, maestroLayers }: any) {
+function MitigationView({ toolsByLayer, proposedMitigations, mitigationLibrary, maestroLayers, toggleMitigation }: any) {
     const allMitigations = useMemo(() => {
         const merged = [...mitigationLibrary];
         proposedMitigations?.forEach((pm: Mitigation) => {
@@ -249,11 +249,22 @@ function MitigationView({ toolsByLayer, proposedMitigations, mitigationLibrary, 
                                         ))}
                                     </div>
                                 </div>
-                                <div className="bg-emerald-950/20 p-4 rounded-2xl border border-emerald-500/20">
-                                    <div className="text-[10px] font-bold text-emerald-500 uppercase mb-2 flex items-center gap-2">
-                                        <ExternalLink className="w-3 h-3" /> Technical Evidence
+                                <div className="flex flex-col gap-4">
+                                    <div className="bg-emerald-950/20 p-4 rounded-2xl border border-emerald-500/20">
+                                        <div className="text-[10px] font-bold text-emerald-500 uppercase mb-2 flex items-center gap-2">
+                                            <ExternalLink className="w-3 h-3" /> Technical Evidence
+                                        </div>
+                                        <p className="text-xs text-zinc-300 italic">"{strat.evidence}"</p>
                                     </div>
-                                    <p className="text-xs text-zinc-300 italic">"{strat.evidence}"</p>
+                                    <button
+                                        onClick={() => toggleMitigation(strat.id)}
+                                        className={`w-full py-3 rounded-xl text-xs font-black transition-all ${strat.status === 'implemented'
+                                            ? "bg-emerald-500 text-black shadow-[0_0_20px_rgba(16,185,129,0.4)]"
+                                            : "bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white border border-zinc-700"
+                                            }`}
+                                    >
+                                        {strat.status === 'implemented' ? "CONTROL ACTIVE" : "DEPLOY MITIGATION"}
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -311,7 +322,8 @@ export function MaestroExplainer() {
     const {
         stack, connections, runMaestroAudit, maestroAudit,
         activeMeetingContext, clientRiskModel,
-        maestroLayers, agenticPatterns, mitigationLibrary
+        maestroLayers, agenticPatterns, mitigationLibrary,
+        toggleMitigation
     } = useClient();
     const [activeView, setActiveView] = useState<'theory' | 'audit' | 'mitigation' | 'patterns'>('theory');
     const [selectedLayerId, setSelectedLayerId] = useState<number | null>(7);
@@ -320,7 +332,7 @@ export function MaestroExplainer() {
 
     useEffect(() => {
         runMaestroAudit();
-    }, [stack.length, connections.length]);
+    }, [stack.length, connections.length, JSON.stringify(maestroAudit.mitigations.map(m => m.status))]);
 
     const selectedLayer = useMemo(() =>
         maestroLayers.find(l => l.id === selectedLayerId),
@@ -429,6 +441,7 @@ export function MaestroExplainer() {
                             proposedMitigations={maestroAudit.mitigations}
                             mitigationLibrary={mitigationLibrary}
                             maestroLayers={maestroLayers}
+                            toggleMitigation={toggleMitigation}
                         />
                     )}
                     {activeView === 'patterns' && (

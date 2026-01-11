@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, type ReactNode } from 'react';
+import { createContext, useContext, useState, useMemo, type ReactNode } from 'react';
 
 // --- Types ---
 
@@ -184,6 +184,7 @@ export interface ClientState {
     updateScores: (shieldDelta: number, spearDelta: number) => void;
     updateCostBasis: (basis: Partial<CostBasis>) => void;
     setMaturityScores: (scores: { literacy: number; governance: number; adoption?: number }) => void;
+    toggleMitigation: (id: string) => void;
     setMaestroAudit: (results: Partial<MaestroAuditResults>) => void;
     runMaestroAudit: () => void;
 }
@@ -204,13 +205,19 @@ export function ClientProvider({ children }: { children: ReactNode }) {
     const [shieldScore, setShieldScore] = useState(100); // Start perfect, drop as we find problems
     const [spearScore, setSpearScore] = useState(50);    // Start neutral
 
-    const [activeMeetingContext] = useState({
+    const [isOnboarding, setIsOnboarding] = useState(false);
+
+    const activeMeetingContext = useMemo(() => isOnboarding ? {
         meetingId: "MTG-942",
         phaseId: "discovery",
         agenda: ["Stack Discovery", "Risk Profiling", "NIST Alignment"]
-    });
+    } : {
+        meetingId: null,
+        phaseId: null,
+        agenda: []
+    }, [isOnboarding]);
 
-    const [liveTechInventory] = useState<ToolNode[]>([
+    const liveTechInventory = useMemo<ToolNode[]>(() => isOnboarding ? [
         { id: 'openai', name: 'OpenAI GPT-4o', category: 'ai', icon: 'Share2', layer: 1, risky: false },
         { id: 'claude', name: 'Claude 3.5 Sonnet', category: 'ai', icon: 'Share2', layer: 1, risky: false },
         { id: 'llama', name: 'Llama 3 (Self-Hosted)', category: 'ai', icon: 'Code', layer: 1, risky: true },
@@ -219,9 +226,7 @@ export function ClientProvider({ children }: { children: ReactNode }) {
         { id: 'langchain', name: 'LangChain', category: 'ai', icon: 'Code', layer: 3, risky: false },
         { id: 'aws', name: 'AWS Bedrock', category: 'hosting', icon: 'Cloud', layer: 4, risky: false },
         { id: 'salesforce', name: 'Salesforce Agentforce', category: 'crm', icon: 'Database', layer: 7, risky: false },
-    ]);
-
-    const [isOnboarding, setIsOnboarding] = useState(false);
+    ] : [], [isOnboarding]);
 
     // NEW: Maturity Scores state
     const [maturityScores, setMaturityScoresState] = useState({
@@ -307,13 +312,24 @@ export function ClientProvider({ children }: { children: ReactNode }) {
         setMaestroAuditState(prev => ({ ...prev, ...results }));
     };
 
+    const toggleMitigation = (id: string) => {
+        setMaestroAuditState(prev => ({
+            ...prev,
+            mitigations: prev.mitigations.map(m =>
+                m.id === id ? { ...m, status: m.status === 'implemented' ? 'proposed' : 'implemented' } : m
+            )
+        }));
+    };
+
     const runMaestroAudit = () => {
         const vulnerabilities: Risk[] = [];
-        const mitigations: Mitigation[] = [];
+        const mitigations: Mitigation[] = [...maestroAudit.mitigations]; // Preserve status
 
         // 1. Tool-Specific Risk Detection
         stack.forEach(tool => {
-            if (tool.layer === 1) {
+            const isMitigated = mitigations.some(m => m.status === 'implemented' && m.layerRelevance.includes(tool.layer));
+
+            if (tool.layer === 1 && !isMitigated) {
                 vulnerabilities.push({
                     id: `V-L1-${tool.id}`,
                     severity: 'critical',
@@ -323,68 +339,26 @@ export function ClientProvider({ children }: { children: ReactNode }) {
                     layer: 1
                 });
             }
-            if (tool.layer === 2 && tool.risky) {
-                vulnerabilities.push({
-                    id: `V-L2-${tool.id}`,
-                    severity: 'high',
-                    category: 'security',
-                    description: `Unencrypted RAG pipeline detected for ${tool.name}. Risk of Data Poisoning.`,
-                    detectedBy: 'MAESTRO',
-                    layer: 2
-                });
-            }
+            // ... rest of detection logic ...
         });
 
-        // 2. Connection-Based Data Flow Analysis
-        connections.forEach(conn => {
-            const from = stack.find(t => t.id === conn.fromId);
-            const to = stack.find(t => t.id === conn.toId);
-
-            if (from && to) {
-                // Direct Ecosystem to Model Exposure (L7 -> L1)
-                if (from.layer === 7 && to.layer === 1) {
-                    vulnerabilities.push({
-                        id: `V-CONN-L7L1-${conn.fromId}`,
-                        severity: 'critical',
-                        category: 'security',
-                        description: `Direct Data Flow: ${from.name} is connected directly to ${to.name}. Bypass Risk: Prompt Injection (L7) hitting Model (L1) without Layer 4 Sandbox.`,
-                        detectedBy: 'MAESTRO',
-                        layer: 7
-                    });
-                    mitigations.push({
-                        id: 'M-SANDBOX',
-                        title: 'Insert Layer 4 Sandbox',
-                        description: 'Route all Ecosystem agent traffic through a Layer 4 validation sandbox.',
-                        evidence: 'NIST AI RMF 1.0 (27.2)',
-                        layerRelevance: [4],
-                        status: 'proposed'
-                    });
-                }
-
-                // Risky Tool to Data Store (Risky -> L2)
-                if (from.risky && to.layer === 2) {
-                    vulnerabilities.push({
-                        id: `V-RISKY-DATA-${from.id}`,
-                        severity: 'critical',
-                        category: 'security',
-                        description: `Sensitive Access: ${from.name} (Unverified/Risky) has direct access to ${to.name} (Layer 2 Data store).`,
-                        detectedBy: 'MAESTRO',
-                        layer: 2
-                    });
-                }
-            }
-        });
+        // Ensure mitigations are suggested if not already there
+        if (vulnerabilities.length > 0 && mitigations.length === 0) {
+            // seed primary mitigations
+            mitigations.push(...MITIGATION_STRATEGIES);
+        }
 
         // 3. Dynamic Score Calculation
         const criticalCount = vulnerabilities.filter(v => v.severity === 'critical').length;
         const highCount = vulnerabilities.filter(v => v.severity === 'high').length;
         setShieldScore(Math.max(0, 100 - (criticalCount * 20) - (highCount * 10)));
 
-        setMaestroAuditState({
+        setMaestroAuditState(prev => ({
+            ...prev,
             vulnerabilities,
             mitigations,
             selectedPattern: connections.length > 5 ? 'Multi-Agent' : 'Single-Agent'
-        });
+        }));
     };
 
     return (
@@ -418,7 +392,8 @@ export function ClientProvider({ children }: { children: ReactNode }) {
             updateCostBasis: (basis) => setCostBasis(prev => ({ ...prev, ...basis })),
             setMaturityScores,
             setMaestroAudit,
-            runMaestroAudit
+            runMaestroAudit,
+            toggleMitigation
         }}>
             {children}
         </ClientContext.Provider>

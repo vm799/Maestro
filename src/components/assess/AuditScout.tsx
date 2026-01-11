@@ -53,18 +53,20 @@ const AUDIT_QUESTIONS = [
 ];
 
 export function AuditScout() {
-    const { identifiedRisks, frictionCost, costBasis, updateCostBasis, shieldScore, spearScore, updateScores } = useClient();
+    const {
+        identifiedRisks, frictionCost, costBasis, updateCostBasis,
+        shieldScore, spearScore, updateScores, isOnboarding
+    } = useClient();
 
     const [messages, setMessages] = useState<Message[]>([]);
     const [inputText, setInputText] = useState('');
-    const [step, setStep] = useState<'calibration' | 'audit' | 'complete'>('calibration'); // New Phase: Calibration first
+    const [step, setStep] = useState<'calibration' | 'audit' | 'complete'>('calibration');
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [isTyping, setIsTyping] = useState(false);
     const scrollRef = useRef<HTMLDivElement>(null);
 
     // Initial Boot
     useEffect(() => {
-        // If we have risks but haven't validated costs, start there.
         if (identifiedRisks.length > 0 && messages.length === 0) {
             setMessages([
                 {
@@ -81,9 +83,15 @@ export function AuditScout() {
                 }
             ]);
         } else if (messages.length === 0) {
-            setMessages([{ id: 'empty', sender: 'bot', text: "Your stack looks clean... maybe too clean. Go back to the Stack Map and add the tools your team *actually* uses." }]);
+            setMessages([{
+                id: 'empty',
+                sender: 'bot',
+                text: isOnboarding
+                    ? "Welcome to the Sandbox. Your simulated stack looks clean. Add some potentially risky tools in the Stack Map to see me in action!"
+                    : "Awaiting live meeting sync for audit context... Connect the Maestro MeetingParser to begin real-time risk orchestration."
+            }]);
         }
-    }, [identifiedRisks.length]); // Only run once or when risks change significantly
+    }, [identifiedRisks.length, isOnboarding]); // Only run once or when risks change significantly
 
     useEffect(() => {
         if (scrollRef.current) {

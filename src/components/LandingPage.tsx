@@ -77,7 +77,7 @@ export function LandingPage({ onLogin }: LandingPageProps) {
                                 <CheckCircle className="w-4 h-4 text-emerald-500" /> Enterprise Ready
                             </div>
                             <div className="flex items-center gap-2">
-                                <CheckCircle className="w-4 h-4 text-emerald-500" /> SOC2 Compliant
+                                <CheckCircle className="w-4 h-4 text-emerald-500" /> MAESTRO Framework Compliance
                             </div>
                         </div>
                     </div>
