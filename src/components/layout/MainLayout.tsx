@@ -116,7 +116,11 @@ export function MainLayout() {
             <div className={`${sidebarOpen ? "w-64" : "w-16"} transition-all duration-300 bg-zinc-900 text-zinc-300 flex flex-col border-r border-zinc-800`}>
                 <div className="p-4 flex items-center justify-between">
                     {sidebarOpen && <span className="font-bold tracking-widest uppercase text-xs text-white">Maestro OS</span>}
-                    <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-1 hover:bg-zinc-800 rounded">
+                    <button
+                        onClick={() => setSidebarOpen(!sidebarOpen)}
+                        className="p-1 hover:bg-zinc-800 rounded"
+                        aria-label={sidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
+                    >
                         <Menu className="w-5 h-5" />
                     </button>
                 </div>
@@ -199,6 +203,7 @@ function NavItem({ icon: Icon, label, active, collapsed, onClick }: any) {
     return (
         <button
             onClick={onClick}
+            aria-label={label}
             className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all border border-transparent ${active
                 ? "bg-zinc-800 text-white border-zinc-700 shadow-sm"
                 : "text-zinc-400 hover:text-white hover:bg-zinc-800/50"

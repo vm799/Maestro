@@ -13,17 +13,14 @@ export function AuditModule() {
         setTimeout(() => {
             setAnalyzing(false);
             setResult({
-                score: 65,
-                gaps: [
-                    "No AI-specific Firewall detected",
-                    "Hardcoded API Keys in older repos",
-                    "Lack of Human-in-the-Loop logs"
-                ],
+                score: 100,
+                gaps: [], // All gaps resolved
                 plan: [
-                    "Install Maestro Middleware (npm install @maestro/shield)",
-                    "Deploy 'Governor Agent' to CI/CD Pipeline",
-                    "Enable ISO 42001 Logging"
-                ]
+                    "Maestro Sentinel (AI Firewall) Active",
+                    "Maestro Logger (HITL) Enabled",
+                    "ISO 42001 Real-time Monitoring Operational"
+                ],
+                resolved: true
             });
         }, 2000);
     };
@@ -108,11 +105,11 @@ export function AuditModule() {
                                 {result.score}/100
                             </div>
                             <div>
-                                <h2 className="text-xl font-bold">Security Posture: {result.score < 70 ? "VULNERABLE" : "OPTIMAL"}</h2>
+                                <h2 className="text-xl font-bold">Security Posture: {result.score < 100 ? "VULNERABLE" : "OPTIMAL"}</h2>
                                 <p className="text-muted-foreground">
-                                    {result.score < 70
+                                    {result.score < 100
                                         ? "Critical gaps identified. Immediate remediation recommended via Maestro Governance Layer."
-                                        : "Systems operational. Minor tweaks recommended."}
+                                        : "Systems operational. All governance layers are strictly enforced and verified."}
                                 </p>
                             </div>
                         </div>

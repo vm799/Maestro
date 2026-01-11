@@ -40,6 +40,7 @@ export function Dashboard() {
                 </div>
                 <button
                     onClick={() => setIsWizardOpen(true)}
+                    aria-label="Create New Engagement"
                     className="bg-primary text-black px-4 py-2 rounded-lg font-bold flex items-center gap-2 hover:opacity-90 transition-opacity"
                 >
                     <Plus className="w-4 h-4" /> New Engagement
@@ -52,6 +53,10 @@ export function Dashboard() {
                     <div
                         key={client.id}
                         onClick={() => loadClient(client)}
+                        aria-label={`Open engagement for ${client.name}`}
+                        role="button"
+                        tabIndex={0}
+                        onKeyDown={(e) => e.key === 'Enter' && loadClient(client)}
                         className="group relative bg-zinc-900 border border-zinc-800 rounded-xl p-6 hover:border-primary/50 transition-all cursor-pointer shadow-lg hover:shadow-primary/10"
                     >
                         <div className="flex justify-between items-start mb-6">
